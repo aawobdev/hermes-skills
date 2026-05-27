@@ -122,8 +122,7 @@ Full details including fallbacks and VRAM notes: see `model-routing/SKILL.md`.
 - Role skills are in `role-*/SKILL.md` — edit in place, changes are picked up immediately
   (no Hermes restart needed as long as the directory is in `skills.external_dirs`)
 - Model changes go in `model-routing/SKILL.md`
-- After editing, run `scripts/render.py` only if inventory.yaml was touched — these
-  skills don't feed into prometheus/homer config
+- Changes are picked up by Hermes immediately — no restart needed
 
 ---
 
@@ -135,7 +134,10 @@ Both Hermes instances load these skills via `skills.external_dirs`:
 # In hermes config.yaml
 skills:
   external_dirs:
-    - C:\Users\alistair\Documents\Dev\homelab\hermes-skills\orchestration  # local
-    # OR on the VM:
-    - /home/hermes/homelab/hermes-skills/orchestration
+    - C:\Users\alistair\Documents\Dev\hermes-skills\orchestration  # Windows (local Hermes)
+    # OR on the VM (clone this repo to ~/hermes-skills/):
+    - /home/hermes/hermes-skills/orchestration
 ```
+
+This repo is on GitHub — clone it on any new Hermes instance, then add the path to
+`skills.external_dirs`. Pull to get skill updates.
