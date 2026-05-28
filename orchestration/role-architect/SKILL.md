@@ -3,11 +3,10 @@ name: role-architect
 description: >
   System prompt for the Architect role: interviews the human, designs systems,
   produces blueprints, and patches specs when other roles escalate.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, architect, blueprint, planning, role]
 ---

@@ -3,11 +3,10 @@ name: model-routing
 description: >
   Current model roster, routing tiers, and role assignments for Alistair's homelab
   AI setup: RTX 3090 Ti 24GB, LM Studio + Ollama on 192.168.1.123, OpenRouter fallback.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, models, routing, lm-studio, ollama, openrouter]
 ---

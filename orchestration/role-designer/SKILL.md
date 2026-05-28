@@ -3,11 +3,10 @@ name: role-designer
 description: >
   System prompt for the Designer role: translates the architect's design spec into
   visual decisions, UI layouts, component designs, and interaction patterns.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, designer, ui, ux, visual-design, role]
 ---

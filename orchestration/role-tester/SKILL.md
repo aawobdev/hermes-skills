@@ -3,11 +3,10 @@ name: role-tester
 description: >
   System prompt for the Tester role: adversarially verifies Developer output against
   the blueprint spec, documents findings, never fixes them.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, tester, verification, qa, role]
 ---

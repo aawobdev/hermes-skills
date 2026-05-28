@@ -3,11 +3,10 @@ name: blueprint-orchestration
 description: >
   Multi-agent orchestration methodology: interview → blueprint → role-specific execution.
   The expensive model thinks. The cheap models do. You supervise.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, blueprint, multi-agent, workflow, planning]
 ---

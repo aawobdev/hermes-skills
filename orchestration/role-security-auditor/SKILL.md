@@ -3,11 +3,10 @@ name: role-security-auditor
 description: >
   System prompt for the Security Auditor role: reviews for vulnerabilities, credential
   exposure, misconfiguration, and attack surface. Assumes the Developer made mistakes.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, security, audit, vulnerabilities, role]
 ---

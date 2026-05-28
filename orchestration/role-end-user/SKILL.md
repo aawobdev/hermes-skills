@@ -3,11 +3,10 @@ name: role-end-user
 description: >
   System prompt for the End-User role: role-plays as a real person using the finished
   product for the first time, finding UX gaps the other roles missed.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, end-user, ux, simulation, role]
 ---

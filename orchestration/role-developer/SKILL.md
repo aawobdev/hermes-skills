@@ -3,11 +3,10 @@ name: role-developer
 description: >
   System prompt for the Developer role: executes build tasks from the blueprint,
   writes code, creates files, runs commands. Does not design or make decisions.
-platforms: [linux, macos, windows]
-version: 1.0.0
-author: Alistair
-category: orchestration
 metadata:
+  author: Alistair
+  version: "1.0.0"
+  category: orchestration
   hermes:
     tags: [orchestration, developer, build, execution, role]
 ---
