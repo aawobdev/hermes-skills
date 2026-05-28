@@ -139,5 +139,10 @@ skills:
     - /home/hermes/hermes-skills/orchestration
 ```
 
-This repo is on GitHub — clone it on any new Hermes instance, then add the path to
-`skills.external_dirs`. Pull to get skill updates.
+Repo: https://github.com/aawobdev/hermes-skills
+
+Clone on any new Hermes instance, then add the path to `skills.external_dirs`:
+```bash
+git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
+```
+Pull to get skill updates.
