@@ -28,11 +28,13 @@ Current AI model roster and routing for Alistair's homelab.
 
 | Model | Size | Context | Role fit |
 |-------|------|---------|----------|
-| `qwen/qwen3.6-35b-a3b` | ~22GB MoE | 64k | Architect, Security — thinking model |
-| `qwen/qwen3.6-27b` | ~17GB | 64k | Architect fallback, orchestration |
-| `mistralai/devstral-small-2-2512` | ~15GB | 64k | Developer (available via LMS) |
-| `google/gemma-4-26b-a4b` | ~17GB | 32k | Vision, Tester, End-User |
-| `google/gemma-4-e4b` | ~3GB | 32k | Fast tasks, End-User |
+| `qwen/qwen3.6-35b-a3b` | ~22.1GB MoE | 256k | Architect, Security — thinking model |
+| `qwen/qwen3.6-27b` | ~17.5GB | 256k | Architect, orchestration — thinking model |
+| `qwen/qwen3-coder-30b` | ~18.6GB MoE | 256k | Developer (long context) |
+| `mistralai/devstral-small-2-2512` | ~15.2GB | 384k | Developer (long context) |
+| `google/gemma-4-31b` | ~19.9GB | 256k | General (dense, thorough) |
+| `google/gemma-4-26b-a4b` | ~18GB MoE | 256k | Vision, Tester, End-User |
+| `google/gemma-4-e4b` | ~6.3GB | 128k | Fast tasks, End-User |
 
 **Thinking models** (qwen3.6-35b-a3b, qwen3.6-27b):
 - Set `max_tokens ≥ 4000` — models use ~1700 reasoning tokens before output
@@ -44,11 +46,11 @@ Current AI model roster and routing for Alistair's homelab.
 
 | Model | Size | Context | Role fit |
 |-------|------|---------|----------|
-| `devstral-small-2:24b` | ~15GB Q4 | 64k | Developer primary |
-| `qwen3-coder:30b` | ~19GB | 64k | Developer fallback |
-| `gemma4:26b` | ~17GB | 32k | Tester, End-User, Vision |
-| `phi4:14b` | ~9GB | 64k | Quick tasks, routing |
-| `gpt-oss:20b` | ~12GB | 64k | General fallback |
+| `devstral-small-2:24b` | ~15.2GB Q4 | 128k | Developer primary |
+| `qwen3-coder:30b` | ~18.6GB | 64k | Developer fallback |
+| `gpt-oss:20b` | ~13.8GB MXFP4 | 64k | General fallback |
+| `gemma4:26b` | ~18GB | 32k | Tester, End-User, Vision |
+| `phi4:14b` | ~9.1GB | 16k | Quick tasks, routing, math/STEM |
 
 **KV cache**: `OLLAMA_KV_CACHE_TYPE=q8_0` set in User environment (restart Ollama to activate)
 
@@ -79,7 +81,7 @@ TIER 3 — OpenRouter / Cloud (fallback, cost-controlled)
 |------|---------|-----------|-----------|
 | Architect | `qwen3.6-35b-a3b` (LMS) | `qwen3.6-27b` (LMS) | Claude Sonnet (cloud) |
 | Designer | `qwen3.6-35b-a3b` (LMS) | `qwen3.6-27b` (LMS) | `gemma4:26b` (Ollama) |
-| Developer | `devstral-small-2:24b` (Ollama) | `qwen3-coder:30b` (Ollama) | `qwen3.6-27b` (LMS, /no_think) |
+| Developer | `devstral-small-2:24b` (Ollama) | `qwen3-coder:30b` (Ollama) | `qwen3-coder-30b` (LMS, 256k) |
 | Tester | `gemma4:26b` (Ollama) | `qwen3-coder:30b` (Ollama) | `qwen3.6-35b-a3b` (LMS) |
 | Security | `qwen3.6-35b-a3b` (LMS) | `qwen3.6-27b` (LMS) | Claude Sonnet (cloud) |
 | End-User | `gemma4:26b` (Ollama) | `gemma-4-e4b` (LMS) | `qwen3.6-27b` (LMS, /no_think) |
@@ -182,6 +184,6 @@ Loading order when VRAM is constrained (24GB total):
 
 1. Unload LM Studio model first if switching to Ollama (LM Studio UI → unload button)
 2. Or unload Ollama model: `ollama stop [model-name]`
-3. Largest models that fit alone: `qwen3.6-35b-a3b` (~22GB), `qwen3-coder:30b` (~19GB)
-4. Models that allow headroom for system: `devstral-small-2:24b` (~15GB), `qwen3.6-27b` (~17GB)
-5. `phi4:14b` (~9GB) can run alongside lighter system load
+3. Largest models that fit alone: `qwen3.6-35b-a3b` (~22.1GB), `gemma-4-31b` (~19.9GB), `qwen3-coder-30b`/`qwen3-coder:30b` (~18.6GB)
+4. Models that allow headroom for system: `qwen3.6-27b` (~17.5GB), `gemma-4-26b-a4b`/`gemma4:26b` (~18GB), `devstral-small-2` (~15.2GB)
+5. `gpt-oss:20b` (~13.8GB) and `phi4:14b` (~9.1GB) leave the most headroom
