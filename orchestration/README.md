@@ -136,7 +136,7 @@ skills:
   external_dirs:
     - C:\Users\alistair\Documents\Dev\hermes-skills\orchestration  # Windows (local Hermes)
     # OR on the VM (clone this repo to ~/hermes-skills/):
-    - /home/hermes/hermes-skills/orchestration
+    - /home/alistair/hermes-skills/orchestration
 ```
 
 Repo: https://github.com/aawobdev/hermes-skills

@@ -44,7 +44,7 @@ Current AI model roster and routing for Alistair's homelab.
 
 | Model | Size | Context | Role fit |
 |-------|------|---------|----------|
-| `devstral-small-2:24b-instruct-2512-q4_K_M` | ~15GB Q4 | 64k | Developer primary |
+| `devstral-small-2:24b` | ~15GB Q4 | 64k | Developer primary |
 | `qwen3-coder:30b` | ~19GB | 64k | Developer fallback |
 | `gemma4:26b` | ~17GB | 32k | Tester, End-User, Vision |
 | `phi4:14b` | ~9GB | 64k | Quick tasks, routing |
