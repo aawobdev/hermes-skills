@@ -24,6 +24,9 @@ Current AI model roster and routing for Alistair's homelab.
 
 ## Model Roster
 
+> Full registry with sizes, quantization, system prompts, and tags: `scripts/tools/owi/models.yaml` in the homelab repo.
+> To load into context — Windows: `read_file(path='C:/Users/alistair/Documents/Dev/homelab/scripts/tools/owi/models.yaml')` · Linux: `read_file(path='/opt/homelab/scripts/tools/owi/models.yaml')`
+
 ### LM Studio models (192.168.1.123:1234)
 
 | Model | Size | Context | Role fit |
@@ -44,13 +47,13 @@ Current AI model roster and routing for Alistair's homelab.
 
 ### Ollama models (192.168.1.123:11434)
 
-| Model | Size | Context | Role fit |
-|-------|------|---------|----------|
-| `devstral-small-2:24b` | ~15.2GB Q4 | 128k | Developer primary |
-| `qwen3-coder:30b` | ~18.6GB | 64k | Developer fallback |
-| `gpt-oss:20b` | ~13.8GB MXFP4 | 64k | General fallback |
-| `gemma4:26b` | ~18GB | 32k | Tester, End-User, Vision |
-| `phi4:14b` | ~9.1GB | 16k | Quick tasks, routing, math/STEM |
+| Model | Size | Quant | Context | Role fit |
+|-------|------|-------|---------|----------|
+| `devstral-small-2:24b` | ~15.2GB | Q4_K_M | 128k | Developer primary |
+| `qwen3-coder:30b` | ~18.6GB | Q4_K_M | 64k | Developer fallback |
+| `gpt-oss:20b` | ~13.8GB | MXFP4 | 64k | General fallback |
+| `gemma4:26b` | ~18GB | Q4_K_M | 32k | Tester, End-User, Vision |
+| `phi4:14b` | ~9.1GB | Q4_K_M | 16k | Quick tasks, routing, math/STEM |
 
 **KV cache**: `OLLAMA_KV_CACHE_TYPE=q8_0` set in User environment (restart Ollama to activate)
 
