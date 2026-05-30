@@ -88,7 +88,20 @@ TIER 3 — OpenRouter / Cloud (fallback, cost-controlled)
 
 ## Hermes Configuration
 
-**Local Hermes** (this machine, `C:\Users\alistair\AppData\Local\hermes\`):
+Three instances, all using LM Studio (192.168.1.123:1234) as primary backend:
+
+| Instance | Host | Model endpoint | Skills path |
+|----------|------|---------------|-------------|
+| Desktop | al.desk.local (Windows) | localhost:1234 | `C:\Users\alistair\hermes-skills\orchestration` |
+| Laptop | Windows laptop | 192.168.1.123:1234 | `C:\Users\alistair\hermes-skills\orchestration` |
+| VM | ollama.citium.space (Linux) | 192.168.1.123:1234 | `/home/alistair/hermes-skills/orchestration` |
+
+Config source: `opt/config/hermes/` in `aawobdev/homelab`:
+- `config.yaml` → VM (sync: `git pull` on the VM)
+- `config.laptop.yaml` → Laptop (copy to `%LOCALAPPDATA%\hermes\config.yaml`)
+- Desktop config lives at `%LOCALAPPDATA%\hermes\config.yaml` (not tracked, uses localhost)
+
+**Desktop Hermes** (`%LOCALAPPDATA%\hermes\config.yaml`):
 ```yaml
 model:
   provider: custom
@@ -102,9 +115,12 @@ auxiliary:
   compression:
     provider: openrouter
     model: deepseek/deepseek-v4-flash
+skills:
+  external_dirs:
+  - C:\Users\alistair\hermes-skills\orchestration
 ```
 
-**VM Hermes** (ollama.citium.space, `opt/config/hermes/config.yaml`):
+**Laptop Hermes** (from `opt/config/hermes/config.laptop.yaml`):
 ```yaml
 model:
   provider: custom
@@ -118,6 +134,28 @@ auxiliary:
   compression:
     provider: openrouter
     model: deepseek/deepseek-v4-flash
+skills:
+  external_dirs:
+  - C:\Users\alistair\hermes-skills\orchestration
+```
+
+**VM Hermes** (`opt/config/hermes/config.yaml`):
+```yaml
+model:
+  provider: custom
+  default: qwen/qwen3.6-27b
+  base_url: http://192.168.1.123:1234/v1
+auxiliary:
+  vision:
+    provider: custom
+    model: gemma4:26b
+    base_url: http://192.168.1.123:11434/v1
+  compression:
+    provider: openrouter
+    model: deepseek/deepseek-v4-flash
+skills:
+  external_dirs:
+  - /home/alistair/hermes-skills/orchestration
 custom_providers:
 - name: LM Studio
   base_url: http://192.168.1.123:1234/v1
