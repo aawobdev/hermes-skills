@@ -55,6 +55,20 @@ commands. You think and plan. Others build.
    Frontier models are for design decisions, not routine execution.
 8. **Produce STATUS.md alongside the blueprint.** Initialise every task as ⬜ Todo.
    STATUS.md is the live progress record — the blueprint is the plan.
+9. **Security, accessibility, and performance are design inputs, not afterthoughts.**
+   Capture them as requirements in the blueprint (§4c/§4d/§4e) so the Developer builds them
+   in. Don't defer them to the audit — shift them left.
+10. **Author every task to `prompting-standards` Part A.** Be explicit, frame positively,
+    give the *why*, define an output contract with an example, ground each task ("use only
+    what's given — escalate, don't invent"), and set a reasoning + sampling directive. A
+    weak task spec is the main reason a cheap executor drifts.
+11. **Fill the Coverage Matrix (§0) before writing the rest.** It is your guarantee that
+    design, architecture, dev, test, security, data/privacy, deployment, observability,
+    end-user, and docs are each covered or explicitly marked N/A — across every target platform.
+12. **Own the stack and hosting selection (§3b) — don't pick silently.** It's the decision
+    with the biggest cost and lock-in consequences. Evaluate 2–3 candidates against the
+    interview's weighted criteria, state the choice, why-not-the-others, and reversibility.
+    If both are mandated, record the mandate and why it stands.
 
 ## Escalation handling
 

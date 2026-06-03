@@ -37,6 +37,30 @@ is to find what everyone else overlooked.
 
 ## Check areas
 
+**Start from the spec.** If the blueprint defines Security Requirements (§4d), audit against
+them first — every stated requirement should be verifiably implemented. Then go beyond the
+spec looking for what nobody anticipated. Select the relevant areas below for the app type;
+mark the rest N/A.
+
+### Application security — web (OWASP Top 10)
+- **Injection**: SQL/NoSQL/command/LDAP — is all untrusted input parameterised/escaped?
+- **Broken access control**: can a user reach data/actions they shouldn't (IDOR, missing
+  authz checks, forced browsing)? Test horizontal and vertical privilege escalation.
+- **Authentication & sessions**: password storage (hashed + salted, modern algorithm),
+  session fixation, secure/HttpOnly/SameSite cookies, token expiry, brute-force protection.
+- **XSS**: reflected/stored/DOM — is output encoded for its context? Is a CSP present?
+- **CSRF**: state-changing requests protected by tokens/SameSite?
+- **SSRF / insecure deserialization / XXE**: where user input reaches a fetch, parser, or
+  deserializer.
+- **Security misconfiguration**: verbose errors, directory listing, default routes exposed.
+- **Cryptographic failures**: weak/again-rolled crypto, secrets in transit without TLS.
+
+### Application security — mobile (OWASP Mobile Top 10)
+- Insecure local data storage (tokens/PII in plaintext, logs, or backups)
+- Insecure communication (no TLS / no cert pinning where warranted)
+- Hardcoded secrets in the app bundle; weak platform permission usage
+- Reverse-engineering / tamper exposure for sensitive logic
+
 ### Secrets & credentials
 - Hardcoded API keys, passwords, tokens in source code
 - Secrets in git history (even if removed in current commit)
@@ -86,10 +110,23 @@ git ls-files | grep -E "\.(env|key|pem|p12|pfx|htpasswd)$"
 # Docker image scanning (if trivy available)
 trivy image [image-name]
 
-# Dependency audit (if npm/pip)
+# Dependency audit / SCA (software composition analysis)
 npm audit
 pip-audit
+# osv-scanner -r .        # multi-ecosystem vulnerability scan
+
+# SAST (static analysis) — pick what's installed for the stack
+semgrep --config auto .
+# bandit -r .             # Python
+# gosec ./...             # Go
+
+# DAST (dynamic, against a running instance) — for web apps
+# nikto -h http://localhost:PORT
+# OWASP ZAP baseline scan against the staged URL
 ```
+
+Automated tools find the known classes; your job is the logic and authz flaws they miss.
+Treat scanner output as input, not the verdict — triage false positives, don't just forward them.
 
 ## Report format
 
@@ -143,6 +180,14 @@ SUMMARY:
 - **Medium**: exploitable under specific conditions, or cascading risk
 - **Low**: theoretical risk, defence-in-depth gap, best practice deviation
 - **Info**: informational, no immediate risk
+
+## Prompting notes (per `prompting-standards`)
+
+- This is a high-reasoning task — let the model think (A7). Don't suppress reasoning for an audit.
+- Ground every finding: cite the exact `file:line` or component (A8). A finding without a
+  location and a concrete fix is noise, not a finding.
+- Distinguish *real* risk from *theoretical* — over-reporting trains people to ignore you.
+  Grade severity honestly and say what an attacker would actually do.
 
 ## Model assignment
 

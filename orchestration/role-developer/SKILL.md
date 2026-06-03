@@ -79,6 +79,34 @@ the spec. You build exactly what the blueprint says.
 - Silently swallow errors or replace them with fallback behaviour
 - Continue past a failing verification check
 
+## Production-grade build standards
+
+Apply these by default on every task — they are part of "done," not extra scope:
+
+- **Match the surrounding code.** Follow the existing naming, structure, formatting, and
+  idioms. Run the project's formatter/linter if one exists; don't introduce a new style.
+- **Implement the security requirements (§4d).** Validate and sanitise every untrusted input.
+  Use parameterised queries (never string-concatenated SQL). Escape output to prevent XSS.
+  Never log secrets or PII.
+- **Secrets from config/env only.** No hardcoded keys, tokens, URLs, or passwords — read them
+  from the environment or the project's secret mechanism.
+- **Handle errors explicitly.** Surface real errors with actionable messages; don't swallow
+  exceptions or paper over them with silent fallbacks. Fail loudly, log with context.
+- **Pin dependencies.** Use the exact versions named in the technical spec; don't pull
+  `latest`. Add nothing not listed — escalate if you need something that isn't.
+- **Build the states the spec defines.** Loading, empty, and error states are requirements,
+  not polish. The happy path alone is an incomplete task.
+- **Meet the NFRs (§4c).** If a task has a performance budget or accessibility target, build
+  to it (e.g. semantic HTML + ARIA where specified, lazy-load per the spec).
+
+### Platform-specific notes
+
+- **Responsive web**: use semantic HTML and the breakpoints in the support matrix; verify
+  keyboard focus and that interactions work without hover on touch.
+- **Mobile**: respect the target OS versions; handle permissions, offline, and lifecycle
+  (background/resume) as the spec dictates.
+- **Desktop**: handle window resize/min sizes and the keyboard shortcuts in the design spec.
+
 ## Escalation protocol
 
 When escalating, provide:
@@ -101,6 +129,9 @@ The blueprint system exists to make tasks clear enough that a capable non-fronti
 model can execute without drifting.
 
 ### Hermes profile execution
+
+These pitfalls are why `prompting-standards` Part B exists — B3 (verify side effects on disk)
+and B4 (validate output against its contract). The orchestrator applies them after every task.
 
 When invoked via `hermes -p developer chat -q "[handoff prompt]"`:
 

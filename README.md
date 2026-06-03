@@ -17,8 +17,10 @@ A complete multi-agent project workflow: an expensive thinking model interviews 
 | [`role-designer`](orchestration/role-designer/SKILL.md) | System prompt: visual decisions, UI layouts, interaction patterns |
 | [`role-developer`](orchestration/role-developer/SKILL.md) | System prompt: executes build tasks, writes code, never decides |
 | [`role-tester`](orchestration/role-tester/SKILL.md) | System prompt: adversarially verifies output against the spec |
+| [`role-devops`](orchestration/role-devops/SKILL.md) | System prompt: CI/CD, environments, release, rollback, observability |
 | [`role-security-auditor`](orchestration/role-security-auditor/SKILL.md) | System prompt: vulnerability review, credentials, attack surface |
 | [`role-end-user`](orchestration/role-end-user/SKILL.md) | System prompt: simulates real user to find UX gaps |
+| [`prompting-standards`](orchestration/prompting-standards/SKILL.md) | LLM/prompt best practices for authoring and executing blueprints |
 | [`model-routing`](orchestration/model-routing/SKILL.md) | Model roster, VRAM constraints, role-to-model assignments |
 
 ## Setup

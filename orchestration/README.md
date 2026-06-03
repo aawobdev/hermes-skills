@@ -30,8 +30,10 @@ verification commands turns a $0.001/task local model into a reliable executor.
 | `role-designer` | System prompt for the Designer. Activates when UI/visual work is needed. |
 | `role-developer` | System prompt for the Developer. Executes build tasks from the blueprint. |
 | `role-tester` | System prompt for the Tester. Adversarially verifies Developer output. |
+| `role-devops` | System prompt for the DevOps/Release role. CI/CD, release, rollback, observability. |
 | `role-security-auditor` | System prompt for the Security Auditor. Reviews for vulnerabilities. |
 | `role-end-user` | System prompt for the End-User. Simulates real user interaction. |
+| `prompting-standards` | LLM/prompt best practices: how blueprints are authored and executed. |
 | `model-routing` | Current model roster, VRAM constraints, role-to-model assignments. |
 
 ---
@@ -108,8 +110,9 @@ not in this skills directory. Only reusable methodology lives here.
 |------|---------------|-------|
 | Architect | `qwen3.6-35b-a3b` | LM Studio |
 | Designer | `qwen3.6-35b-a3b` | LM Studio |
-| Developer | `devstral-small-2:24b` | Ollama |
+| Developer | `qwen3-coder-30b` | LM Studio |
 | Tester | `gemma4:26b` | Ollama |
+| DevOps | `qwen3-coder-30b` | LM Studio |
 | Security | `qwen3.6-35b-a3b` | LM Studio |
 | End-User | `gemma4:26b` | Ollama |
 
