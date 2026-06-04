@@ -102,7 +102,7 @@ TIER 3 — OpenRouter / Cloud (fallback, cost-controlled)
 | Role | Primary | tok/s | Fallback 1 | Fallback 2 |
 |------|---------|-------|-----------|-----------|
 | Architect | `qwen3.6-35b-a3b` (LMS) | ~135 | `qwen3.6-27b` (LMS, ~38) | Claude Sonnet (cloud) |
-| Designer | `qwen3.6-35b-a3b` (LMS) | ~135 | `qwen3.6-27b` (LMS, ~38) | `gemma4:26b` (Ollama, ~113) |
+| Designer | `qwen3.6-35b-a3b` (LMS) | ~135 | `qwen3.6-27b` (LMS, ~38) | Claude Sonnet (cloud — blank canvas only) |
 | Developer | `qwen3-coder-30b` (LMS) | ~148 | `qwen3-coder:30b` (Ollama, ~135) | `devstral-small-2:24b` (Ollama, ~47) |
 | Tester | `gemma4:26b` (Ollama) | ~113 | `qwen3-coder:30b` (Ollama, ~135) | `qwen3.6-35b-a3b` (LMS, ~135) |
 | DevOps | `qwen3-coder-30b` (LMS) | ~148 | `qwen3-coder:30b` (Ollama, ~135) | `qwen3.6-35b-a3b` (LMS, ~135) for release-risk reasoning |

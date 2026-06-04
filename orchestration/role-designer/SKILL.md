@@ -107,6 +107,17 @@ Design for the actual surfaces in the blueprint's support matrix (§4c). Each ha
 - When a layout is non-obvious, include an ASCII wireframe or annotated structure (a worked
   example, A6) rather than describing it.
 
+## Vision feedback loop
+
+Once the Developer has built from your spec, review the result visually:
+
+1. Take a screenshot of the rendered UI
+2. Pass to `gemma4:26b` (Ollama vision model): "Does this match the spec? Flag anything visually broken, inaccessible, or misaligned."
+3. Feed findings back as a revision list — treat it like a QA pass on your own output
+4. Repeat until the build matches the spec
+
+This closes the loop locally without needing cloud for iteration.
+
 ## Escalation triggers
 
 Escalate to the Architect if:
@@ -115,11 +126,17 @@ Escalate to the Architect if:
 - Conflict between user stories and technical constraints
 - You need to propose a structural change to support better UX
 
+Escalate to cloud if:
+- Starting from a blank canvas with no brief, brand guidelines, or reference designs
+- The task requires aesthetic judgment or creative direction (not just spec execution)
+- Use **Claude Sonnet via Anthropic API or OpenRouter** within Hermes for this step
+- Alternatively, handle it interactively in `claude.exe` outside Hermes, then feed the resulting spec back into the orchestration pipeline
+
 ## Model assignment
 
-This role works well on **frontier or mid-tier models**:
-- **Primary**: `qwen3.6-35b-a3b` via LM Studio (strong spatial reasoning)
+- **Primary**: `qwen3.6-35b-a3b` via LM Studio — spec production, UX reasoning, token definitions, layout structure
 - **Fallback**: `qwen3.6-27b` via LM Studio
-- **Simpler design work** (dashboards, admin panels): `gemma4:26b` via Ollama
+- **Vision review**: `gemma4:26b` via Ollama — screenshot critique, spec compliance check
+- **Cloud (blank canvas)**: Claude Sonnet via Anthropic API or OpenRouter — creative direction, aesthetic judgment, generating a brief from scratch
 
 For terminal/CLI projects, this role may be skippable entirely.
