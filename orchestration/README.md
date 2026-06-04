@@ -106,17 +106,17 @@ not in this skills directory. Only reusable methodology lives here.
 
 ## Model quick reference
 
-| Role | Use this model | Where |
-|------|---------------|-------|
+| Role | Primary | Where |
+|------|---------|-------|
 | Architect | `qwen3.6-35b-a3b` | LM Studio |
-| Designer | `qwen3.6-35b-a3b` | LM Studio |
+| Designer | `qwen3.6-35b-a3b` | LM Studio — spec/UX reasoning; `gemma4:26b` for vision review; Claude Sonnet for blank-canvas creative direction |
 | Developer | `qwen3-coder-30b` | LM Studio |
 | Tester | `gemma4:26b` | Ollama |
 | DevOps | `qwen3-coder-30b` | LM Studio |
 | Security | `qwen3.6-35b-a3b` | LM Studio |
 | End-User | `gemma4:26b` | Ollama |
 
-Full details including fallbacks and VRAM notes: see `model-routing/SKILL.md`.
+Full details including tok/s benchmarks, fallbacks, and VRAM notes: see `model-routing/SKILL.md`.
 
 ---
 
@@ -131,14 +131,22 @@ Full details including fallbacks and VRAM notes: see `model-routing/SKILL.md`.
 
 ## Hermes config (for reference)
 
-Both Hermes instances load these skills via `skills.external_dirs`:
+Three Hermes instances load these skills via `skills.external_dirs`:
 
 ```yaml
-# In hermes config.yaml
+# Desktop (C:\Users\Alistair\Documents\Dev\hermes-skills)
 skills:
   external_dirs:
-    - C:\Users\alistair\Documents\Dev\hermes-skills\orchestration  # Windows (local Hermes)
-    # OR on the VM (clone this repo to ~/hermes-skills/):
+    - C:\Users\Alistair\Documents\Dev\hermes-skills\orchestration
+
+# Laptop (C:\Users\Alistair\Documents\Development\hermes-skills)
+skills:
+  external_dirs:
+    - C:\Users\Alistair\Documents\Development\hermes-skills\orchestration
+
+# VM (ollama.citium.space)
+skills:
+  external_dirs:
     - /home/alistair/hermes-skills/orchestration
 ```
 

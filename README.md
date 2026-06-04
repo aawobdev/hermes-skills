@@ -28,14 +28,21 @@ A complete multi-agent project workflow: an expensive thinking model interviews 
 Clone and point your Hermes config at the skill directory:
 
 ```bash
+# Linux / VM
 git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
 ```
 
+```powershell
+# Windows
+git clone https://github.com/aawobdev/hermes-skills "$env:USERPROFILE\Documents\Development\hermes-skills"
+```
+
 ```yaml
-# hermes config.yaml
+# hermes config.yaml (~/.hermes/config.yaml)
 skills:
   external_dirs:
-    - ~/hermes-skills/orchestration
+    - ~/hermes-skills/orchestration               # Linux
+    # - C:\Users\YourName\Documents\Development\hermes-skills\orchestration  # Windows
 ```
 
 ## Usage
