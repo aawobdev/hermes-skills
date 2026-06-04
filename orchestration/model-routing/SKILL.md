@@ -31,13 +31,15 @@ Current AI model roster and routing for Alistair's homelab.
 
 | Model | Size | tok/s | Context | Role fit |
 |-------|------|-------|---------|----------|
-| `qwen/qwen3-coder-30b` | ~18.6GB MoE | ~148 | 256k | Developer primary |
-| `qwen/qwen3.6-35b-a3b` | ~22.1GB MoE | ~135 | 256k | Architect, Security — thinking model |
-| `qwen/qwen3.6-27b` | ~17.5GB dense | ~38 | 256k | Architect fallback — thinking model, slow (dense) |
-| `mistralai/devstral-small-2-2512` | ~15.2GB | ~46 | 384k | Developer fallback (long context) |
-| `google/gemma-4-26b-a4b` | ~18GB MoE | ~113 | 256k | Vision, Tester, End-User |
-| `google/gemma-4-e4b` | ~6.3GB | ~108 | 128k | Fast tasks, End-User |
-| `google/gemma-4-31b` | ~19.9GB dense | ~22 | 256k | Avoid for interactive use — too slow |
+| `qwen/qwen3-coder-30b` | ~18.6GB MoE | ~148 | 64k | Developer primary |
+| `qwen/qwen3.6-35b-a3b` | ~22.1GB MoE | ~135 | 64k | Architect, Security — thinking model (**primary Hermes default**) |
+| `qwen/qwen3.6-27b` | ~17.5GB dense | ~38 | 64k | Architect fallback — thinking model, slow (dense) |
+| `mistralai/devstral-small-2-2512` | ~15.2GB | ~46 | 64k | Developer fallback (long context) |
+| `google/gemma-4-26b-a4b` | ~18GB MoE | ~113 | 64k | Vision, Tester, End-User |
+| `google/gemma-4-e4b` | ~6.3GB | ~108 | 64k | Fast tasks, End-User |
+| `google/gemma-4-31b` | ~19.9GB dense | ~22 | 64k | Avoid for interactive use — too slow |
+
+**Context**: all LM Studio models run at **64K** — the global default in LM Studio's `settings.json`; no per-model overrides. The models' architectural max is higher (128k–384k) but is not configured.
 
 **Architecture note — 35B-A3B vs 27B**: The 35B-A3B runs at ~135 tok/s and the 27B at ~38 tok/s despite being larger.
 Both have thinking mode. The 35B-A3B is MoE (~3B active params/token); the 27B is dense (all 27B active every token).
@@ -124,7 +126,7 @@ Config source: `opt/config/hermes/` in `aawobdev/homelab`:
 ```yaml
 model:
   provider: custom
-  default: qwen/qwen3.6-27b
+  default: qwen/qwen3.6-35b-a3b
   base_url: http://localhost:1234/v1
 auxiliary:
   vision:
@@ -143,7 +145,7 @@ skills:
 ```yaml
 model:
   provider: custom
-  default: qwen/qwen3.6-27b
+  default: qwen/qwen3.6-35b-a3b
   base_url: http://192.168.1.123:1234/v1
 auxiliary:
   vision:
@@ -162,7 +164,7 @@ skills:
 ```yaml
 model:
   provider: custom
-  default: qwen/qwen3.6-27b
+  default: qwen/qwen3.6-35b-a3b
   base_url: http://192.168.1.123:1234/v1
 auxiliary:
   vision:
