@@ -5,7 +5,7 @@ description: >
   The expensive model thinks. The cheap models do. You supervise.
 metadata:
   author: Alistair
-  version: "1.0.0"
+  version: "1.0.1"
   category: orchestration
   hermes:
     tags: [orchestration, blueprint, multi-agent, workflow, planning]
@@ -442,6 +442,9 @@ Paste the role card (from Hermes skill `role-[name]`) into a fresh session, then
 ### 13. PROGRESS TRACKING
 The Architect produces `STATUS.md` at blueprint finalisation. Every role updates it.
 
+> **Note:** STATUS.md is read independently — do not use §-notation cross-references
+> (e.g. `§4e`) in it. Write plain English instead (e.g. "GDPR requirement").
+
 ```
 # Project Status — [project name]
 Last updated: [date] by [role/model]
@@ -463,6 +466,11 @@ The Architect produces `DECISIONS.md` alongside `STATUS.md`. Append when:
 - A blueprint section is patched, scope changes, source-of-truth conflict resolved,
   role added/removed, model swapped, interview assumption turns out wrong.
 
+> **Note:** DECISIONS.md is read independently of the blueprint — do not use §-notation
+> shorthand in the `Affects` field. Write plain English section names instead.
+> Good: `"Architecture, all build tasks, model assignments"`
+> Bad: `"§3, §3b, §6 (all tasks), §7"`
+
 ```
 # Decisions & Changes — [project name]
 
@@ -470,7 +478,7 @@ The Architect produces `DECISIONS.md` alongside `STATUS.md`. Append when:
 **Trigger**: [what prompted this]
 **Decision**: [what was decided]
 **Why**: [reasoning]
-**Affects**: [blueprint sections / tasks]
+**Affects**: [plain English — e.g. "Architecture and all build tasks", not §-notation]
 **Decided by**: [role / human / model]
 ```
 
