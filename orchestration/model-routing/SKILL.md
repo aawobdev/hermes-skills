@@ -16,7 +16,7 @@ metadata:
 Current AI model roster and routing for Alistair's homelab.
 
 **Hardware**: RTX 3090 Ti 24GB VRAM (desktop at 192.168.1.123)
-**Inference**: Ollama only (port 11434) — models loaded via Modelfile; 35B-A3B at 32K ctx, all others 64K
+**Inference**: Ollama only (port 11434) — all models loaded via Modelfile with 64K context
 **KV cache**: `OLLAMA_KV_CACHE_TYPE=q8_0` set in User environment on desktop
 
 ---
@@ -30,7 +30,7 @@ Current AI model roster and routing for Alistair's homelab.
 
 | Model | Size | Quant | tok/s | Context | Role fit |
 |-------|------|-------|-------|---------|----------|
-| `qwen3.6:35b-a3b-q4_K_M` | ~23GB | Q4_K_M | ~104 | 32k | Architect, Security, **Hermes default** — thinking model, ~10% CPU offload |
+| `qwen3.6:35b-a3b-q4_K_M` | ~23GB | Q4_K_M | ~104 | 64k | Architect, Security, **Hermes default** — thinking model, ~10% CPU offload |
 | `qwen3.6:27b-q4_K_M` | ~17GB | Q4_K_M | ~38 | 64k | Architect fallback — thinking model, 2.7× slower (dense), use only if 35b unavailable |
 | `qwen3-coder:30b` | ~18.6GB | Q4_K_M | ~135 | 64k | Developer primary |
 | `gemma4:26b` | ~18GB | Q4_K_M | ~113 | 64k | Tester, End-User, Vision |
@@ -238,7 +238,7 @@ Loading order when VRAM is constrained (24GB total, ~0.5GB idle baseline):
 1. Unload LM Studio model first if switching to Ollama (LM Studio UI → unload, or via v1 API)
 2. Or unload Ollama model: `ollama stop [model-name]`
 
-Measured VRAM above idle baseline (q8_0 KV cache; 35B-A3B at 32k ctx, others at 64k):
+Measured VRAM above idle baseline (q8_0 KV cache, 64k context):
 
 | Model | VRAM above baseline | Headroom left |
 |-------|-------------------|---------------|
