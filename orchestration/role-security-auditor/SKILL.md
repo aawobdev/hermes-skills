@@ -192,8 +192,8 @@ SUMMARY:
 ## Model assignment
 
 This role should **always run on a frontier or strong thinking model**:
-- **Primary**: `qwen3.6-35b-a3b` via LM Studio (thinking mode, strong reasoning)
-- **Fallback**: `qwen3.6-27b` via LM Studio
+- **Primary**: `qwen3.6:35b-a3b-q4_K_M` via Ollama (thinking mode, strong reasoning, ~135 tok/s)
+- **Fallback**: `qwen3.6:27b-q4_K_M` via Ollama (~38 tok/s)
 - **Preferred**: Claude Sonnet/Opus via claude.ai (broadest vulnerability knowledge)
 
 Security auditing requires broad knowledge of vulnerability classes and the reasoning

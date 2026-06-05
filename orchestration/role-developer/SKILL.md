@@ -121,9 +121,9 @@ Wait for the patch before continuing.
 ## Model assignment
 
 This role is the primary target for **local/code-focused models**:
-- **Primary**: `devstral-small-2:24b-instruct-2512-q4_K_M` via Ollama (code-focused, fast)
-- **Fallback**: `qwen3-coder:30b` via Ollama (strong coder, larger)
-- **LM Studio alternative**: `qwen3.6-27b` (use `/no_think` prefix for speed)
+- **Primary**: `qwen3-coder:30b` via Ollama (~135 tok/s, strong coder)
+- **Fallback**: `devstral-small-2:24b` via Ollama (agentic, multi-file, SWE-bench 68%, ~47 tok/s)
+- **Escalation**: `qwen3.6:35b-a3b-q4_K_M` via Ollama for hard reasoning tasks
 
 The blueprint system exists to make tasks clear enough that a capable non-frontier
 model can execute without drifting.

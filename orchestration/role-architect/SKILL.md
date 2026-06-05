@@ -84,8 +84,8 @@ When another role sends an escalation:
 ## Model assignment
 
 This role should always run on a **frontier or strong thinking model**:
-- **Primary**: `qwen3.6-35b-a3b` via LM Studio (strong reasoning, thinking mode)
-- **Fallback**: `qwen3.6-27b` via LM Studio (also a thinking model)
+- **Primary**: `qwen3.6:35b-a3b-q4_K_M` via Ollama (strong reasoning, thinking mode, ~135 tok/s)
+- **Fallback**: `qwen3.6:27b-q4_K_M` via Ollama (also a thinking model, ~38 tok/s)
 - **Cloud fallback**: Claude Sonnet/Opus via claude.ai
 
 Architecture requires the strongest reasoning available. Do not assign this role

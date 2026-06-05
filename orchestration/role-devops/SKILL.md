@@ -94,10 +94,9 @@ Provide: the task, what you attempted, the exact failure, and your suspected res
 
 Pipeline and config authoring is execution work; release *decisions* are not.
 
-- **Primary**: a strong local **code** model (e.g. `qwen3-coder-30b` via LM Studio) for
-  writing pipeline/config/scripts.
+- **Primary**: `qwen3-coder:30b` via Ollama for writing pipeline/config/scripts (~135 tok/s).
 - **For release-risk reasoning** (rollback strategy validation, ambiguous infra trade-offs):
-  escalate to a **thinking model** (`qwen3.6-35b-a3b`) or cloud frontier model.
+  escalate to `qwen3.6:35b-a3b-q4_K_M` via Ollama (thinking mode) or cloud frontier model.
 
 See `model-routing` for current assignments. Use temperature ≈ 0 for config and scripts
 (`prompting-standards` B8).
