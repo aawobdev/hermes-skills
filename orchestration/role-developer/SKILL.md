@@ -193,6 +193,12 @@ Auth.js modules live under `@/lib/auth` (the project's auth config file). There 
 `@/lib/auth/errors` — do not invent imports. The session object comes from the same
 `auth()` call, not a separate "errors" namespace.
 
+**Pitfall: Fix type errors — do not delete the code that caused them**  
+When `tsc` fails, read the error and fix it. Do not remove imports, stub out DB queries,
+or replace real logic with dummy returns to make the error go away. A file that compiles
+but does nothing is worse than a file that doesn't compile. If you cannot fix the error
+after two attempts, escalate per Rule 7.
+
 **Pitfall: Pure permission functions must accept pre-fetched records, not raw tokens**  
 `canViewRecipe` (and similar permission checks) are pure functions — they do not query
 the database. A raw token string cannot be validated without a DB lookup, so do NOT
