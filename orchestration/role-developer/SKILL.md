@@ -5,7 +5,7 @@ description: >
   writes code, creates files, runs commands. Does not design or make decisions.
 metadata:
   author: Alistair
-  version: "1.0.0"
+  version: "1.1.0"
   category: orchestration
   hermes:
     tags: [orchestration, developer, build, execution, role]
@@ -69,6 +69,20 @@ the spec. You build exactly what the blueprint says.
    ```
 9. **Update STATUS.md after each completed task.** Mark ✅ Done. If blocked,
    mark 🔴 Blocked and add it to the Blockers section.
+10. **If a task contains multiple output files, work through them one at a time.**
+    Write one file → run its verify step → report → proceed to the next. Never batch
+    multiple file writes into a single response. Each artifact must be confirmed on disk
+    before the next begins. This is what makes partial failures recoverable.
+11. **If a shell command fails, stop — do not work around it.** If `terminal`,
+    `write_file`, or a package install errors, report immediately:
+    `BLOCKED: [tool] unavailable — cannot run [command]. Environment fix required.`
+    Do not fall back to Python subprocess, ctypes, sandboxed execution, or any other
+    workaround. A broken tool environment means subsequent verification is unreliable;
+    continuing produces unverified output that may silently corrupt the build.
+12. **Context budget guard.** If your remaining context is below ~15% and any
+    sub-task is still in progress, stop and report current state immediately. Do not
+    start the next sub-task. The orchestrator will resume in a fresh session with the
+    completed artifacts already on disk.
 
 ## What you should never do
 
@@ -77,6 +91,7 @@ the spec. You build exactly what the blueprint says.
 - Change function signatures, API contracts, or data schemas
 - Skip verification because "it obviously works"
 - Silently swallow errors or replace them with fallback behaviour
+- Write multiple files in one response when they can each be verified independently
 - Continue past a failing verification check
 
 ## Production-grade build standards
@@ -144,3 +159,74 @@ orchestrator extracts the code and writes it directly.
 **Known pitfall:** Local models may invent CSS class names not present in the actual
 stylesheet. The handoff prompt must include exact class names. The orchestrator must
 verify class name alignment after each file-writing task.
+
+### Pitfalls — Auth.js v5 on App Router
+
+**Pitfall: `withAuth` / `withOptionalAuth` type signatures**  
+When Auth.js v5 routes are API routes (not page handlers), the incoming request is a
+bare `NextRequest`, not `GetServerSidePropsContext` or Express `req/res/next`. The correct
+signature — no generic type parameter, cast to the intersection type at the call site:
+
+  ```ts
+  export function withAuth(
+    handler: (req: NextRequest & { auth: Record<string, unknown> }) => Promise<Response>,
+  ): (req: NextRequest) => Promise<Response> {
+    return async (req: NextRequest) => {
+      const session = await auth()
+      if (!session || !session.user?.id) {
+        return Response.json(failure('UNAUTHORIZED', 'Unauthorized'), { status: 401 })
+      }
+      const authedReq = req as NextRequest & { auth: Record<string, unknown> }
+      authedReq.auth = session.user as Record<string, unknown>
+      return handler(authedReq)
+    }
+  }
+  ```
+
+Do **not** add a `<T extends Response>` generic — it is unused and causes TypeScript to
+infer incorrect return types. Attach auth info by casting to the intersection type, not
+with `(req as any)`. The session check must call `auth()` (from `@/lib/auth`) and inspect
+`session?.user?.id`, NOT `getServerSession`.
+
+**Pitfall: Import paths in middleware**  
+Auth.js modules live under `@/lib/auth` (the project's auth config file). There is no
+`@/lib/auth/errors` — do not invent imports. The session object comes from the same
+`auth()` call, not a separate "errors" namespace.
+
+**Pitfall: Pure permission functions must accept pre-fetched records, not raw tokens**  
+`canViewRecipe` (and similar permission checks) are pure functions — they do not query
+the database. A raw token string cannot be validated without a DB lookup, so do NOT
+write `shareToken?: string` and stub the logic with `return false`. The correct pattern
+is to accept a pre-fetched record and check it:
+
+  ```ts
+  export function canViewRecipe(
+    user: User | null,
+    recipe: Recipe,
+    share?: Pick<Share, 'recipeId' | 'expiresAt'> | null,
+  ): boolean {
+    if (recipe.status === RecipeStatus.PUBLIC) return true
+    if (user?.id === recipe.authorId) return true
+    if (share && share.recipeId === recipe.id && share.expiresAt > new Date()) return true
+    return false
+  }
+  ```
+
+The **caller** (the API route handler) extracts the token from the request, queries
+`Share.findFirst({ where: { token } })`, and passes the result in. The function stays
+pure and fully testable without a database.
+
+**Pitfall: Optional-auth must be tolerant of missing cookies**  
+If no cookie exists, `auth()` throws. `withOptionalAuth` should wrap the call in try/catch
+and treat errors as unauthenticated — never let it propagate to the handler. Also do NOT
+write `await auth() ?? {}` — the `?? {}` produces a `{}` type that TypeScript treats as
+having no properties, causing `session.user?.id` to error at the type level. Always assign
+to a typed variable first:
+
+  ```ts
+  let user: Record<string, unknown> | null = null
+  try {
+    const session = await auth()
+    if (session?.user?.id) user = session.user as Record<string, unknown>
+  } catch { /* unauthenticated */ }
+  ```

@@ -6,7 +6,7 @@ description: >
   roles execute those prompts against an LLM. Referenced by every other skill.
 metadata:
   author: Alistair
-  version: "1.0.0"
+  version: "1.1.0"
   category: orchestration
   hermes:
     tags: [orchestration, prompting, llm, best-practices, reference]
@@ -68,7 +68,9 @@ sensible micro-decisions inside the task without escalating.
 - Put reference material (existing code, schemas, file listings) in clearly fenced blocks or
   tagged sections (e.g. `<spec>…</spec>`, `<existing_code>…</existing_code>`) so the model
   can tell *instructions* from *data*.
-- Keep one task = one prompt. Don't bundle unrelated work.
+- **One output per prompt.** Keep one task = one prompt. Don't bundle unrelated work.
+  A task that produces N files is N tasks. Each has its own verify step and can be restarted
+  independently if it fails — a bundled task cannot.
 
 ### A5. Define an output contract
 
@@ -110,6 +112,10 @@ The most damaging failure for a cheap executor is confident invention.
 
 ### A9. Decompose into atomic, verifiable, restartable tasks
 
+- **One output contract per task.** One file, one command, one artifact. If a task produces
+  three files, it is three tasks. Bundled tasks exhaust cheap-model context windows, and a
+  failure mid-bundle leaves the system in an unrecoverable partial state. Small tasks are also
+  faster to re-run and easier to verify.
 - One focused outcome per task; small enough for a single session.
 - Each task names a concrete, checkable `Verify:` step.
 - Each task is restartable without losing prior work (idempotent where possible) — a worker
@@ -226,8 +232,9 @@ This keeps each session's context clean (B1) and makes every handoff inspectable
 ## Quick checklist
 
 **Authoring a task (Architect):** explicit · positive framing · says *why* · structured ·
-output contract + example · few-shot if subtle · reasoning directive · grounded ("don't
-invent — escalate") · atomic & verifiable · self-check · sampling hint.
+**one output per task** · output contract + example · few-shot if subtle · reasoning
+directive · grounded ("don't invent — escalate") · atomic & verifiable · self-check ·
+sampling hint.
 
 **Executing a task (orchestrator/role):** fresh session · stable prefix · verify side effects
 on disk · validate structured output · re-prompt with new signal not identical retry · cheap

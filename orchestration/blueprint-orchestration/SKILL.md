@@ -5,7 +5,7 @@ description: >
   The expensive model thinks. The cheap models do. You supervise.
 metadata:
   author: Alistair
-  version: "1.0.1"
+  version: "1.0.2"
   category: orchestration
   hermes:
     tags: [orchestration, blueprint, multi-agent, workflow, planning]
@@ -321,6 +321,9 @@ Escalate if: [the specific ambiguity or blocker that should stop the task]
 ```
 
 Task design rules:
+- **One output per task.** Each task produces exactly one artifact (one file, one schema,
+  one migration). A task that creates three files is three tasks. Bundled tasks exhaust
+  cheap-model context windows and leave partial failures non-recoverable.
 - Each task produces a verifiable output with an explicit output contract
 - Each task is independent enough to restart without losing prior work (idempotent)
 - Each task is grounded: it names everything the executor needs, and tells it to escalate
