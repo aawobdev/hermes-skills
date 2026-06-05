@@ -70,6 +70,7 @@ TIER 2 -- OpenRouter / Cloud (fallback, cost-controlled)
 
 | Role | Primary | tok/s | Fallback 1 | Fallback 2 |
 |------|---------|-------|-----------|-----------|
+| Orchestrator | `qwen3.6:35b-a3b-q4_K_M` | ~104 | Claude Sonnet (cloud) | — |
 | Architect | `qwen3.6:35b-a3b-q4_K_M` | ~104 | `qwen3.6:27b-q4_K_M` (~38, 2.7× slower — last resort) | Claude Sonnet (cloud) |
 | Designer | `qwen3.6:35b-a3b-q4_K_M` | ~104 | `qwen3.6:27b-q4_K_M` (~38, 2.7× slower — last resort) | Claude Sonnet (cloud -- blank canvas only) |
 | Developer | `qwen3-coder:30b` | ~135 | `devstral-small-2:24b` (~47) | `qwen3.6:35b-a3b-q4_K_M` (~135) |
