@@ -118,7 +118,7 @@ Use these when the `model-registry` MCP tool is unavailable.
 Example config for a local Ollama setup. Adjust `base_url`, `default` model, and
 `skills.external_dirs` to match your environment.
 
-**Local Ollama** (`%LOCALAPPDATA%\hermes\config.yaml` on Windows, `~/.hermes/config.yaml` on Linux/Mac):
+**Local Ollama** (add to your Hermes config):
 ```yaml
 model:
   provider: custom
