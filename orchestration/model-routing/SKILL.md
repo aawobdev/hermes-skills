@@ -16,8 +16,10 @@ metadata:
 Current AI model roster and routing for Alistair's homelab.
 
 **Hardware**: RTX 3090 Ti 24GB VRAM (desktop at 192.168.1.123)
-**Inference**: Ollama only (port 11434) — all models loaded via Modelfile with 64K context
+**Inference**: Ollama (port 11434) + OpenRouter (orchestrator only)
 **KV cache**: `OLLAMA_KV_CACHE_TYPE=q8_0` set in User environment on desktop
+**Context windows**: per-model via Modelfile — see registry. Authoritative source: `scripts/tools/owi/models.yaml` (`num_ctx` field). Not all models use 64K — see table below.
+**Dynamic routing**: use the `model-registry` MCP tool (`list_available_models`, `get_loaded_models`, `get_model_for_role`) for runtime model selection. Prefer loaded (warm) models to avoid VRAM reload latency.
 
 ---
 
@@ -28,16 +30,24 @@ Current AI model roster and routing for Alistair's homelab.
 
 ### Ollama models (192.168.1.123:11434)
 
-| Model | Size | Quant | tok/s | Context | Role fit |
-|-------|------|-------|-------|---------|----------|
-| `qwen3.6:35b-a3b-q4_K_M` | ~23GB | Q4_K_M | ~104 | 64k | Architect, Security, **Hermes default** — thinking model, ~10% CPU offload |
-| `qwen3.6:27b-q4_K_M` | ~17GB | Q4_K_M | ~38 | 64k | Architect fallback — thinking model, 2.7× slower (dense), use only if 35b unavailable |
-| `qwen3-coder:30b` | ~18.6GB | Q4_K_M | ~135 | 64k | Developer primary |
-| `gemma4:26b` | ~18GB | Q4_K_M | ~113 | 64k | Tester, End-User, Vision |
+| Model | Size | Quant | tok/s | ctx | Role fit |
+|-------|------|-------|-------|-----|----------|
+| `qwen3.6:35b-a3b-q4_K_M` | ~23GB | Q4_K_M | ~104 | **16k** | Architect, Security — thinking model, ~10% CPU offload |
+| `qwen3.6:27b-q4_K_M` | ~17GB | Q4_K_M | ~38 | 32k | Architect fallback — thinking model, 2.7× slower (dense) |
+| `qwen3-coder:30b` | ~18.6GB | Q4_K_M | ~135 | **32k** | Developer primary |
+| `devstral-small-2:24b` | ~15.2GB | Q4_K_M | ~47 | 64k | Developer long-ctx — agentic (SWE-bench 68%) |
+| `qwen2.5-coder:32b-instruct` | ~19GB | Q4_K_M | ~tbd | 32k | Developer strong — complex coding |
+| `qwen2.5-coder:14b` | ~9GB | Q4_K_M | ~tbd | 64k | Developer fast — single-file, high-volume |
+| `glm-4.7-flash` | ~19GB | Q4_K_M | ~tbd | 32k | General fallback |
+| `gemma4:26b` | ~18GB | Q4_K_M | ~113 | **32k** | Tester, End-User, Vision |
 | `gemma4:e4b-it-q4_K_M` | ~9.6GB | Q4_K_M | ~108 | 64k | Fast tasks, End-User |
-| `devstral-small-2:24b` | ~15.2GB | Q4_K_M | ~47 | 64k | Developer fallback — agentic (SWE-bench 68%) |
 | `gpt-oss:20b` | ~13.8GB | MXFP4 | ~127 | 64k | General fallback |
-| `phi4:14b` | ~9.1GB | Q4_K_M | ~72 | 16k | Quick tasks, math/STEM |
+| `phi4:14b` | ~9.1GB | Q4_K_M | ~72 | **16k** | Quick tasks, math/STEM |
+
+**Cloud (OpenRouter)**:
+| Model | Role fit |
+|-------|----------|
+| `deepseek/deepseek-v4-flash` | **Orchestrator** — task decomposition, dynamic model selection, cheap reasoning |
 
 **Thinking models** (`qwen3.6:35b-a3b-q4_K_M`, `qwen3.6:27b-q4_K_M`):
 - Set `max_tokens >= 4000` -- models use ~1700 reasoning tokens before output
@@ -54,33 +64,56 @@ Use 27B only if the 35B is genuinely unavailable; it is slower *and* less capabl
 ## Routing
 
 ```
-TIER 1 -- Ollama (all roles)
-  qwen3.6:35b-a3b-q4_K_M --> Architect, Security, Hermes default (thinking mode, ~104 tok/s)
-  qwen3-coder:30b         --> Developer primary (~135 tok/s)
-  gemma4:26b              --> Tester, End-User, Vision (~113 tok/s)
+TIER 0 -- OpenRouter (orchestrator only)
+  deepseek/deepseek-v4-flash --> Orchestrator (task decomposition, dynamic model selection)
+  when: starting a blueprint execution session
+
+TIER 1 -- Ollama (all worker roles)
+  qwen3.6:35b-a3b-q4_K_M  --> Architect, Security (thinking mode, ~104 tok/s, 16k ctx)
+  qwen3-coder:30b          --> Developer primary (~135 tok/s, 32k ctx)
+  devstral-small-2:24b     --> Developer long-ctx (SWE-bench 68%, ~47 tok/s, 64k ctx)
+  qwen2.5-coder:14b        --> Developer fast (high-volume, 64k ctx)
+  gemma4:26b               --> Tester, End-User, Vision (~113 tok/s, 32k ctx)
   when: local inference exhausted
 
 TIER 2 -- OpenRouter / Cloud (fallback, cost-controlled)
-  deepseek/deepseek-v4-flash --> cheap cloud inference
-  when: deeper capability needed
-  claude-sonnet or gpt-4o --> frontier tasks
+  deepseek/deepseek-v4-flash --> cheap cloud inference (also orchestrator)
+  claude-sonnet or gpt-4o    --> frontier tasks (CC-class)
 ```
 
-### Role-to-model assignment
+### Dynamic model selection (preferred)
 
-| Role | Primary | tok/s | Fallback 1 | Fallback 2 |
-|------|---------|-------|-----------|-----------|
-| Orchestrator | `qwen3.6:35b-a3b-q4_K_M` | ~104 | Claude Sonnet (cloud) | — |
-| Architect | `qwen3.6:35b-a3b-q4_K_M` | ~104 | `qwen3.6:27b-q4_K_M` (~38, 2.7× slower — last resort) | Claude Sonnet (cloud) |
-| Designer | `qwen3.6:35b-a3b-q4_K_M` | ~104 | `qwen3.6:27b-q4_K_M` (~38, 2.7× slower — last resort) | Claude Sonnet (cloud -- blank canvas only) |
-| Developer | `qwen3-coder:30b` | ~135 | `devstral-small-2:24b` (~47) | `qwen3.6:35b-a3b-q4_K_M` (~135) |
-| Tester | `gemma4:26b` | ~113 | `qwen3-coder:30b` (~135) | `qwen3.6:35b-a3b-q4_K_M` (~135) for complex testing |
-| DevOps | `qwen3-coder:30b` | ~135 | `devstral-small-2:24b` (~47) | `qwen3.6:35b-a3b-q4_K_M` (~135) for release-risk reasoning |
-| Security | `qwen3.6:35b-a3b-q4_K_M` | ~104 | `qwen3.6:27b-q4_K_M` (~38, 2.7× slower — last resort) | Claude Sonnet (cloud) |
-| End-User | `gemma4:26b` | ~113 | `gemma4:e4b-it-q4_K_M` (~108) | `qwen3.6:27b-q4_K_M` (/no_think, ~38) |
+Before delegating, the orchestrator should call `get_model_for_role(role)` via the
+`model-registry` MCP tool. This returns:
+- The canonical model for that role
+- Whether it's currently loaded in VRAM (prefer warm models)
+- The exact inference params to use
 
-**Developer note**: `qwen3-coder:30b` is the primary coder at ~135 tok/s. Devstral is the fallback for multi-file
-agentic work (SWE-bench 68%) but runs at only ~47 tok/s -- use it when qwen3-coder struggles with complex multi-step tasks.
+Call `get_loaded_models()` first to check what's warm. If a loaded model can handle the
+task, use it rather than triggering a VRAM reload.
+
+### Role-to-model assignment (static defaults)
+
+Use these when the `model-registry` MCP tool is unavailable.
+
+| Role | Primary | Provider | ctx | Fallback 1 | Fallback 2 |
+|------|---------|----------|-----|-----------|-----------|
+| **Orchestrator** | `deepseek/deepseek-v4-flash` | OpenRouter | — | Claude Sonnet (cloud) | — |
+| Architect | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` (32k, 2.7× slower) | Claude Sonnet |
+| Designer | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` | Claude Sonnet (blank canvas only) |
+| Developer (default) | `qwen3-coder:30b` | Ollama | 32k | `devstral-small-2:24b` (64k) | `qwen2.5-coder:32b-instruct` (32k) |
+| Developer (long-ctx) | `devstral-small-2:24b` | Ollama | 64k | `qwen3-coder:30b` | — |
+| Developer (fast) | `qwen2.5-coder:14b` | Ollama | 64k | `qwen3-coder:30b` | — |
+| Tester | `gemma4:26b` | Ollama | 32k | `qwen3-coder:30b` | `qwen3.6:35b-a3b-q4_K_M` |
+| DevOps | `qwen3-coder:30b` | Ollama | 32k | `devstral-small-2:24b` | `qwen3.6:35b-a3b-q4_K_M` |
+| Security | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` | Claude Sonnet |
+| End-User | `gemma4:26b` | Ollama | 32k | `gemma4:e4b-it-q4_K_M` | `qwen3.6:27b-q4_K_M` |
+
+**Developer model choice guide**:
+- Single-file, high-volume, fast iteration → `qwen2.5-coder:14b` (64k, generous headroom)
+- Standard multi-task blueprint work → `qwen3-coder:30b` (32k, ~135 tok/s)
+- Multi-file agentic sessions hitting 32k+ context → `devstral-small-2:24b` (64k, dense)
+- Complex reasoning + coding → `qwen2.5-coder:32b-instruct` (32k, deepest code quality)
 
 ---
 
@@ -238,15 +271,18 @@ Loading order when VRAM is constrained (24GB total, ~0.5GB idle baseline):
 1. Unload LM Studio model first if switching to Ollama (LM Studio UI → unload, or via v1 API)
 2. Or unload Ollama model: `ollama stop [model-name]`
 
-Measured VRAM above idle baseline (q8_0 KV cache, 64k context):
+Measured VRAM above idle baseline (q8_0 KV cache at each model's capped context):
 
-| Model | VRAM above baseline | Headroom left |
-|-------|-------------------|---------------|
-| `qwen3.6:35b-a3b-q4_K_M` | ~23 GB | ~1 GB — tight |
-| `qwen3-coder:30b` | ~18.6 GB | ~5 GB |
-| `devstral-small-2:24b` | ~15.2 GB | ~8 GB |
-| `gemma4:26b` | ~18 GB | ~5 GB |
-| `qwen3.6:27b-q4_K_M` | ~17 GB | ~7 GB |
-| `gpt-oss:20b` | ~13.5 GB | ~10 GB |
-| `gemma4:e4b-it-q4_K_M` | ~9.6 GB | ~14 GB |
-| `phi4:14b` | ~9.1 GB | ~14 GB |
+| Model | Weights | ctx cap | KV cache | Total | Headroom |
+|-------|---------|---------|----------|-------|----------|
+| `qwen3.6:35b-a3b-q4_K_M` | ~23 GB | **16k** | ~1.5 GB | ~24.5 GB | ~0 — 10% CPU offload |
+| `qwen3-coder:30b` | ~18.6 GB | **32k** | ~3.0 GB | ~21.6 GB | ~2.4 GB |
+| `devstral-small-2:24b` | ~15.2 GB | 64k | ~8.0 GB | ~23.2 GB | ~0.8 GB |
+| `qwen2.5-coder:32b-instruct` | ~19 GB | **32k** | ~4.0 GB | ~23 GB | ~1 GB |
+| `qwen2.5-coder:14b` | ~9 GB | 64k | ~4.0 GB | ~13 GB | ~11 GB |
+| `glm-4.7-flash` | ~19 GB | **32k** | ~4.0 GB | ~23 GB | ~1 GB |
+| `gemma4:26b` | ~18 GB | **32k** | ~3.0 GB | ~21 GB | ~3 GB |
+| `qwen3.6:27b-q4_K_M` | ~17 GB | **32k** | ~4.0 GB | ~21 GB | ~3 GB |
+| `gpt-oss:20b` | ~13.5 GB | 64k | ~4.0 GB | ~17.5 GB | ~6.5 GB |
+| `gemma4:e4b-it-q4_K_M` | ~9.6 GB | 64k | ~2.0 GB | ~11.6 GB | ~12.4 GB |
+| `phi4:14b` | ~9.1 GB | **16k** | ~1.0 GB | ~10.1 GB | ~13.9 GB |

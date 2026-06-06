@@ -78,18 +78,33 @@ STATUS.md to 🔁 In Progress once and ✅ Done only when all sub-delegations co
 
 ## Role and model assignment
 
-Use the blueprint's stated role/model. Standard mapping when not overridden:
+Use the `model-registry` MCP tool to select the best available model at runtime:
 
-| Task type | Role skill | Model | Provider |
-|-----------|-----------|-------|----------|
-| Routine implementation | `role-developer` | `qwen3-coder:30b` | Ollama |
-| Architecture / escalation patch | `role-architect` | `qwen3.6:35b-a3b-q4_K_M` | Ollama |
-| Functional testing | `role-tester` | `gemma4:26b` | Ollama |
-| DevOps / pipeline | `role-devops` | `qwen3-coder:30b` | Ollama |
-| Security audit | `role-security-auditor` | `qwen3.6:35b-a3b-q4_K_M` | Ollama |
-| **CC-class (complex)** | → escalate | Claude Code | Cloud |
+```
+1. Call get_loaded_models() — see what is warm in VRAM right now
+2. Call get_model_for_role(role) — get canonical model + inference params for this role
+3. If the canonical model is loaded → use it (avoids VRAM reload)
+4. If not loaded but a loaded model covers the same role → use the warm one
+5. Otherwise → use the canonical model (accept the reload cost)
+```
 
-See `model-routing` for current tok/s and context limits.
+Standard mapping (used when `model-registry` MCP is unavailable):
+
+| Task type | Role skill | Model | Provider | ctx |
+|-----------|-----------|-------|----------|-----|
+| Routine implementation | `role-developer` | `qwen3-coder:30b` | Ollama | 32k |
+| Multi-file / long sessions | `role-developer` | `devstral-small-2:24b` | Ollama | 64k |
+| Fast / high-volume | `role-developer` | `qwen2.5-coder:14b` | Ollama | 64k |
+| Architecture / escalation patch | `role-architect` | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k |
+| Functional testing | `role-tester` | `gemma4:26b` | Ollama | 32k |
+| DevOps / pipeline | `role-devops` | `qwen3-coder:30b` | Ollama | 32k |
+| Security audit | `role-security-auditor` | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k |
+| **CC-class (complex)** | → escalate | Claude Code | Cloud | — |
+
+The orchestrator itself runs on `deepseek/deepseek-v4-flash` via OpenRouter.
+Start orchestration sessions with: `hermes -p OpenRouter-Orchestrator`
+
+See `model-routing` for full context window constraints and developer model selection guide.
 
 ---
 

@@ -316,6 +316,7 @@ Example:     [one worked example of correct output; add an anti-example if subtl
 Verify:      [exact check to confirm success — a command or concrete inspection]
 Reasoning:   [think | no_think — and why (complex reasoning vs mechanical)]
 Sampling:    [temp ≈ 0 for code/extraction · 0.3–0.7 prose · 0.7+ ideation]
+Capabilities:[reasoning_depth: low|medium|high · context_size: 8k|16k|32k|64k · speed: fast|balanced|slow · cost: cheap|moderate|unlimited]
 Notes:       [gotchas; "use ONLY the names below — invent nothing, escalate instead"]
 Escalate if: [the specific ambiguity or blocker that should stop the task]
 ```

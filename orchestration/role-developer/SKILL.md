@@ -135,10 +135,16 @@ Wait for the patch before continuing.
 
 ## Model assignment
 
-This role is the primary target for **local/code-focused models**:
-- **Primary**: `qwen3-coder:30b` via Ollama (~135 tok/s, strong coder)
-- **Fallback**: `devstral-small-2:24b` via Ollama (agentic, multi-file, SWE-bench 68%, ~47 tok/s)
-- **Escalation**: `qwen3.6:35b-a3b-q4_K_M` via Ollama for hard reasoning tasks
+The orchestrator selects the model via `get_model_for_role()` from the `model-registry`
+MCP tool. The selection depends on task type:
+
+| When | Model | ctx | Notes |
+|------|-------|-----|-------|
+| Standard blueprint tasks | `qwen3-coder:30b` | 32k | ~135 tok/s, default |
+| Sessions hitting 32k+ context | `devstral-small-2:24b` | 64k | ~47 tok/s, dense, SWE-bench 68% |
+| Single-file, high-volume, fast | `qwen2.5-coder:14b` | 64k | fast, generous VRAM headroom |
+| Complex reasoning needed | `qwen2.5-coder:32b-instruct` | 32k | strongest local coder |
+| Hard reasoning + coding | `qwen3.6:35b-a3b-q4_K_M` | 16k | thinking model, escalation only |
 
 The blueprint system exists to make tasks clear enough that a capable non-frontier
 model can execute without drifting.
