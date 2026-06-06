@@ -131,8 +131,14 @@ Full details including tok/s benchmarks, fallbacks, and VRAM notes: see `model-r
 
 ## Hermes config (for reference)
 
-Clone the repo on any Hermes instance, then add the path to `skills.external_dirs`
-in your Hermes config:
+### Via tap (recommended)
+
+```bash
+hermes skills tap add aawobdev/hermes-skills
+hermes skills tap update aawobdev/hermes-skills  # to update
+```
+
+### Manual (external_dirs)
 
 ```bash
 git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
@@ -142,11 +148,11 @@ git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
 # ~/.hermes/config.yaml (Linux/Mac) or %LOCALAPPDATA%\hermes\config.yaml (Windows)
 skills:
   external_dirs:
-    - ~/hermes-skills/orchestration       # Linux/Mac
-    # - C:\Users\<you>\hermes-skills\orchestration  # Windows
+    - ~/hermes-skills/skills       # Linux/Mac
+    # - C:\Users\<you>\hermes-skills\skills  # Windows
 ```
 
-Pull to get skill updates. For remote Ollama (e.g. a separate inference VM), set
+For remote Ollama (e.g. a separate inference VM), set
 `model.base_url` to the remote address:
 
 ```yaml
