@@ -166,6 +166,37 @@ orchestrator extracts the code and writes it directly.
 stylesheet. The handoff prompt must include exact class names. The orchestrator must
 verify class name alignment after each file-writing task.
 
+### Pitfalls — devstral-small output corruption
+
+`devstral-small-2:24b` is used for long-context tasks but has recurring corruption patterns
+in multi-step file-writing sessions. The orchestrator must verify every file it produces:
+
+**HTML entity encoding:** The model sometimes writes `=u003e` instead of `=>` (arrow
+functions) and `=u003c` instead of `<` in source code. The file appears written but the
+TypeScript is broken. After each write, grep for `u003` to detect it:
+```ts
+// broken:   const fn = (x: number) =u003e x + 1
+// correct:  const fn = (x: number) => x + 1
+```
+If detected, the orchestrator must rewrite the file with entities decoded.
+
+**Lowercase HTML namespace generics:** The model writes `html.div`, `html.input`,
+`html.textarea` (a non-existent namespace) instead of the correct TypeScript DOM types
+`HTMLDivElement`, `HTMLInputElement`, `HTMLTextAreaElement`. Search for `html\.` in produced
+files and replace with the correctly-cased `HTML` counterpart.
+
+**JSX in `.ts` files:** The model occasionally puts JSX inside `.ts` files (not `.tsx`),
+which TypeScript rejects. If a hook file (e.g. `useToast.ts`) contains JSX, split it:
+keep pure hook logic in the `.ts` file, move JSX to a new `.tsx` file.
+
+**Wrong React portal API:** The model uses `React.render(<React.StrictMode>...</React.StrictMode>, el)`
+which does not exist in React 18+. The correct API is `ReactDOM.createPortal(content, document.body)`
+imported from `react-dom`. Any modal or overlay component must use the portal pattern.
+
+**Mangled JSX conditionals:** In multi-step writes, conditional rendering can corrupt
+(e.g. `{label && label} <label...`). After each component write, verify the JSX is
+syntactically valid — do not assume a completed `write_file` call produced clean JSX.
+
 ### Pitfalls — Auth.js v5 on App Router
 
 **Pitfall: `withAuth` / `withOptionalAuth` type signatures**  

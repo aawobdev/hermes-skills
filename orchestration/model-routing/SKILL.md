@@ -1,8 +1,8 @@
 ---
 name: model-routing
 description: >
-  Current model roster, routing tiers, and role assignments for Alistair's homelab
-  AI setup: RTX 3090 Ti 24GB, Ollama on 192.168.1.123, OpenRouter fallback.
+  Model roster, routing tiers, and role assignments for a local Ollama + OpenRouter
+  setup. Update to match your own hardware and installed models.
 metadata:
   author: Alistair
   version: "2.0.0"
@@ -13,22 +13,18 @@ metadata:
 
 # Model Routing
 
-Current AI model roster and routing for Alistair's homelab.
+Current AI model roster and routing. Update this file to match your own hardware and installed models.
 
-**Hardware**: RTX 3090 Ti 24GB VRAM (desktop at 192.168.1.123)
 **Inference**: Ollama (port 11434) + OpenRouter (orchestrator only)
-**KV cache**: `OLLAMA_KV_CACHE_TYPE=q8_0` set in User environment on desktop
-**Context windows**: per-model via Modelfile — see registry. Authoritative source: `scripts/tools/owi/models.yaml` (`num_ctx` field). Not all models use 64K — see table below.
+**KV cache**: `OLLAMA_KV_CACHE_TYPE=q8_0` recommended for quality/speed balance
+**Context windows**: per-model via Modelfile — see registry. Not all models use 64K — see table below.
 **Dynamic routing**: use the `model-registry` MCP tool (`list_available_models`, `get_loaded_models`, `get_model_for_role`) for runtime model selection. Prefer loaded (warm) models to avoid VRAM reload latency.
 
 ---
 
 ## Model Roster
 
-> Full registry with sizes, quantization, system prompts, and tags: `scripts/tools/owi/models.yaml` in the homelab repo.
-> To load into context — Windows: `read_file(path='C:/Users/alistair/Documents/Development/homelab/scripts/tools/owi/models.yaml')` · Linux: `read_file(path='/opt/homelab/scripts/tools/owi/models.yaml')`
-
-### Ollama models (192.168.1.123:11434)
+### Ollama models
 
 | Model | Size | Quant | tok/s | ctx | Role fit |
 |-------|------|-------|-------|-----|----------|
@@ -119,24 +115,14 @@ Use these when the `model-registry` MCP tool is unavailable.
 
 ## Hermes Configuration
 
-Three instances, all using Ollama (192.168.1.123:11434) as primary backend:
+Example config for a local Ollama setup. Adjust `base_url`, `default` model, and
+`skills.external_dirs` to match your environment.
 
-| Instance | Host | Model endpoint | Skills path |
-|----------|------|---------------|-------------|
-| Desktop | al.desk.local (Windows) | localhost:11434 | `C:\Users\Alistair\Documents\Development\hermes-skills\orchestration` |
-| Laptop | Windows laptop | 192.168.1.123:11434 | `C:\Users\Alistair\Documents\Development\hermes-skills\orchestration` |
-| VM | ollama.citium.space (Linux) | 192.168.1.123:11434 | `/home/alistair/hermes-skills/orchestration` |
-
-Config source: `opt/config/hermes/` in `aawobdev/homelab`:
-- `config.yaml` → VM (sync: `git pull` on the VM)
-- `config.laptop.yaml` → Laptop (copy to `%LOCALAPPDATA%\hermes\config.yaml`)
-- Desktop config lives at `%LOCALAPPDATA%\hermes\config.yaml` (not tracked, uses localhost)
-
-**Desktop Hermes** (`%LOCALAPPDATA%\hermes\config.yaml`):
+**Local Ollama** (`%LOCALAPPDATA%\hermes\config.yaml` on Windows, `~/.hermes/config.yaml` on Linux/Mac):
 ```yaml
 model:
   provider: custom
-  default: qwen3.6:35b-a3b-q4_K_M
+  default: qwen3.6:35b-a3b-q4_K_M   # change to your preferred default
   base_url: http://localhost:11434/v1
 auxiliary:
   vision:
@@ -148,56 +134,34 @@ auxiliary:
     model: deepseek/deepseek-v4-flash
 skills:
   external_dirs:
-  - C:\Users\alistair\hermes-skills\orchestration
+  - ~/hermes-skills/orchestration     # Linux/Mac
+  # - C:\Users\<you>\hermes-skills\orchestration   # Windows
 custom_providers:
-- name: Ollama-Desktop
+- name: Ollama-Local
   base_url: http://localhost:11434/v1
   model: qwen3-coder:30b
 ```
 
-**Laptop Hermes** (`~\.hermes\config.yaml`, tracked in `opt/config/hermes/config.laptop.yaml`):
+**Remote Ollama** (Ollama on a separate machine):
 ```yaml
 model:
   provider: custom
   default: qwen3.6:35b-a3b-q4_K_M
-  base_url: http://192.168.1.123:11434/v1
+  base_url: http://<ollama-host>:11434/v1
 auxiliary:
   vision:
     provider: custom
     model: gemma4:26b
-    base_url: http://192.168.1.123:11434/v1
+    base_url: http://<ollama-host>:11434/v1
   compression:
     provider: openrouter
     model: deepseek/deepseek-v4-flash
 skills:
   external_dirs:
-  - C:\Users\alistair\hermes-skills\orchestration
+  - ~/hermes-skills/orchestration
 custom_providers:
-- name: Ollama-Desktop
-  base_url: http://192.168.1.123:11434/v1
-  model: qwen3-coder:30b
-```
-
-**VM Hermes** (`~/.hermes/config.yaml`, tracked in `opt/config/hermes/config.yaml`):
-```yaml
-model:
-  provider: custom
-  default: qwen3.6:35b-a3b-q4_K_M
-  base_url: http://192.168.1.123:11434/v1
-auxiliary:
-  vision:
-    provider: custom
-    model: gemma4:26b
-    base_url: http://192.168.1.123:11434/v1
-  compression:
-    provider: openrouter
-    model: deepseek/deepseek-v4-flash
-skills:
-  external_dirs:
-  - /home/alistair/hermes-skills/orchestration
-custom_providers:
-- name: Ollama-Desktop
-  base_url: http://192.168.1.123:11434/v1
+- name: Ollama-Remote
+  base_url: http://<ollama-host>:11434/v1
   model: qwen3-coder:30b
 ```
 
@@ -220,24 +184,26 @@ Code and structured output should almost never run hot. For thinking models, als
 
 ## Model Lineup Cron Job
 
-Daily cron (job id `7eddc85c`, schedule `0 3 * * *`) runs on the **ollama VM** (`ollama.citium.space`) and researches, syncs, and reports the model lineup.
+A daily cron (`0 3 * * *`) can be set up to automatically research, evaluate, and sync
+the model lineup — keeping this skill file up to date without manual effort.
 
-**Prompt source**: `scripts/cron/model-lineup-prompt.txt` in the homelab repo (committed, branch `main`).
-**Also on VM at**: `/opt/homelab/scripts/cron/model-lineup-prompt.txt` (copied from repo).
-**Runtime prompt stored in**: `~/.hermes/cron/jobs.json` (in-memory copy used by the scheduler).
+**Typical phases**: Research new releases → evaluate fit for each role → update model
+presets → sync repos (git pull/commit/push) → deliver report.
 
-**Three-place sync when editing the prompt**:
-1. Edit the file on the VM (`/opt/homelab/scripts/cron/model-lineup-prompt.txt`)
-2. Copy back to Windows repo via `scp` and commit/push to `aawobdev/homelab` branch `main`
-3. Update `jobs.json` on the VM (Python: patch the `prompt` field of job id `7eddc85c`)
+**Model override**: Use `devstral-small-2:24b` for reasoning-heavy crons (multi-phase
+research, API calls, Git ops). It's slower for interactive use (~47 tok/s) but its
+SWE-bench 68% score makes it the right pick for multi-step agentic work.
 
-**Delivery**: `deliver: ['all']` — sends final report to Slack automatically.
+**Per-job model override** (in `~/.hermes/cron/jobs.json`):
+```json
+{
+  "model": { "provider": "Ollama-Local", "model": "devstral-small-2:24b" }
+}
+```
+This does NOT change the Hermes default — only the specific cron job uses it.
+
 **Toolsets**: `['web', 'terminal', 'file', 'search']`.
-**Workdir**: `/opt/homelab`.
-**Model override**: `devstral-small-2:24b` via `Ollama-Desktop` provider (set in `jobs.json` under `model` key — does NOT change the Hermes default).
-**Why devstral**: reasoning-heavy cron (8 phases, web research, API calls, Git ops) needs agentic capability. `devstral-small-2:24b` is slow for interactive use (~47 tok/s) but its SWE-bench 68% score makes it the right pick for multi-step agentic work.
-
-**Phases**: Research new models → evaluate fit → update OWI presets → sync OWI → update hermes-skills model-routing skill → sync hermes-skills repo (git pull/commit/push) → report.
+**Delivery**: configure `deliver` in the job to send the report to your preferred channel.
 
 ---
 
@@ -260,7 +226,7 @@ To assign a specific model to a cron job without changing the Hermes default:
 - Reasoning-heavy crons → capable local model with per-job override (see above)
 - Try local model twice before escalating to cloud
 - OpenRouter spend is the signal for "local inference is failing" — monitor it
-- `OPENROUTER_API_KEY` must be set in Hermes `.env` on the ollama VM
+- `OPENROUTER_API_KEY` must be set in Hermes `.env` on the machine running the orchestrator
 
 ---
 

@@ -511,7 +511,7 @@ Create a Hermes profile per role, each configured for the assigned model:
 hermes profile create developer --clone
 developer config set model.default devstral-small-2:24b-instruct-2512-q4_K_M
 developer config set model.provider custom:Ollama-Desktop
-developer config set model.base_url http://192.168.1.123:11434/v1
+developer config set model.base_url http://localhost:11434/v1
 
 # Per-task execution from orchestrating agent's terminal
 hermes -p developer chat -q "[role card + project context + task spec]"

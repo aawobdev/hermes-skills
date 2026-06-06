@@ -1,7 +1,7 @@
 # Hermes Orchestration Skills
 
-Global Hermes skills for AI-assisted project work. These live in the homelab repo
-and are loaded by both Hermes instances (local and VM) via `skills.external_dirs`.
+Global Hermes skills for AI-assisted project work. Load them on any Hermes instance
+via `skills.external_dirs` in your config.
 
 ---
 
@@ -131,29 +131,26 @@ Full details including tok/s benchmarks, fallbacks, and VRAM notes: see `model-r
 
 ## Hermes config (for reference)
 
-Three Hermes instances load these skills via `skills.external_dirs`:
+Clone the repo on any Hermes instance, then add the path to `skills.external_dirs`
+in your Hermes config:
 
-```yaml
-# Desktop (C:\Users\Alistair\Documents\Dev\hermes-skills)
-skills:
-  external_dirs:
-    - C:\Users\Alistair\Documents\Dev\hermes-skills\orchestration
-
-# Laptop (C:\Users\Alistair\Documents\Development\hermes-skills)
-skills:
-  external_dirs:
-    - C:\Users\Alistair\Documents\Development\hermes-skills\orchestration
-
-# VM (ollama.citium.space)
-skills:
-  external_dirs:
-    - /home/alistair/hermes-skills/orchestration
-```
-
-Repo: https://github.com/aawobdev/hermes-skills
-
-Clone on any new Hermes instance, then add the path to `skills.external_dirs`:
 ```bash
 git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
 ```
-Pull to get skill updates.
+
+```yaml
+# ~/.hermes/config.yaml (Linux/Mac) or %LOCALAPPDATA%\hermes\config.yaml (Windows)
+skills:
+  external_dirs:
+    - ~/hermes-skills/orchestration       # Linux/Mac
+    # - C:\Users\<you>\hermes-skills\orchestration  # Windows
+```
+
+Pull to get skill updates. For remote Ollama (e.g. a separate inference VM), set
+`model.base_url` to the remote address:
+
+```yaml
+model:
+  provider: custom
+  base_url: http://<ollama-host>:11434/v1
+```
