@@ -100,3 +100,9 @@ Pipeline and config authoring is execution work; release *decisions* are not.
 
 See `model-routing` for current assignments. Use temperature ≈ 0 for config and scripts
 (`prompting-standards` B8).
+
+## References
+
+- `references/docker-postgres-setup.md` — Practical gotchas for Docker Compose PostgreSQL
+  with Prisma: port conflicts, pg_hba.conf auth failures, Hermes credential redaction,
+  stale volume credentials, and schema sync without formal migrations.

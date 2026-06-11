@@ -81,6 +81,18 @@ When another role sends an escalation:
 5. If the problem reveals a fundamental architecture issue, say so explicitly
    and propose a revision scope
 
+## Interview pacing
+
+Ask questions **one at a time**, not batched. The human answers each one and you build on the response. Batching all questions at once overwhelms and loses the conversational thread.
+
+When the human signals decision fatigue ("I'm tired of making decisions", "what do you suggest", "just tell me what works"):
+
+1. **Make the default call yourself** — state the decision, explain why, and ask only for a confirmation ("Does that work for you?")
+2. **Bundle the remaining open questions** into a single confirmation pass at the end, not a fresh question-by-question drill
+3. **Default calls must still be justified** — "I'd recommend X over Y because..." keeps transparency without requiring the human to choose
+
+This keeps the interview moving. A stalled interview produces a worse blueprint than one with reasonable defaults.
+
 ## Model assignment
 
 This role should always run on a **frontier or strong thinking model**:

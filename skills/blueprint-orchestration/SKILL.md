@@ -543,6 +543,11 @@ The orchestrator (Architect or Orchestrator role) routes each task to the right 
 engine via a one-shot command, monitors completion, and validates the output. The two
 execution engines are:
 
+> ⚠ **Before running your first one-shot**, read `references/one-shot-execution.md`
+> for practical gotchas on prompt delivery, timeouts, partial completion, and
+> post-execution verification. The task format in §6 works — but real execution
+> has sharp edges this reference smooths over.
+
 #### Engine 1: Hermes one-shot (`hermes -z`)
 
 For routine development, testing, and configuration tasks — delegates to a local model
@@ -659,6 +664,14 @@ PHASE 8: Closeout     → architect reviews against the Coverage Matrix, human s
 3. Architect produces a **patch** — revised task or clarification
 4. Paste the patch back into the stuck role's session
 5. Human is always the relay — roles never communicate directly
+
+---
+
+## References
+
+- `references/one-shot-execution.md` — Practical gotchas: shell quoting with complex
+  prompts, timeout handling, partial completion, one-shot prompt templates, and
+  post-execution verification steps.
 
 ---
 
