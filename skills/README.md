@@ -31,6 +31,7 @@ verification commands turns a $0.001/task local model into a reliable executor.
 | `role-developer` | System prompt for the Developer. Executes build tasks from the blueprint. |
 | `role-tester` | System prompt for the Tester. Adversarially verifies Developer output. |
 | `role-devops` | System prompt for the DevOps/Release role. CI/CD, release, rollback, observability. |
+| `role-researcher` | System prompt for the Researcher. Gathers evidence, compares options, produces reports. |
 | `role-security-auditor` | System prompt for the Security Auditor. Reviews for vulnerabilities. |
 | `role-end-user` | System prompt for the End-User. Simulates real user interaction. |
 | `prompting-standards` | LLM/prompt best practices: how blueprints are authored and executed. |
@@ -65,15 +66,15 @@ Hermes loads the orchestration methodology and starts the Architect interview.
 
 ```
 You → Architect (thinking model) → Blueprint
-                                      ↓
-                         ┌─────────────────────────┐
-                         │ Developer (cheap model)  │ ← executes tasks
-                         │ Tester (mid model)       │ ← validates output
-                         │ Security (thinking model)│ ← reviews for risks
-                         │ End-User (any model)     │ ← simulates usage
-                         └─────────────────────────┘
-                                      ↓
-                              You sign off
+         ↑                              ↓
+    Researcher                ┌─────────────────────────┐
+  (evidence reports)          │ Developer (cheap model)  │ ← executes tasks
+                              │ Tester (mid model)       │ ← validates output
+                              │ Security (thinking model)│ ← reviews for risks
+                              │ End-User (any model)     │ ← simulates usage
+                              └─────────────────────────┘
+                                           ↓
+                                   You sign off
 ```
 
 You are the relay between all phases. Roles never talk to each other directly.
@@ -113,6 +114,7 @@ not in this skills directory. Only reusable methodology lives here.
 | Developer | `qwen3-coder-30b` | LM Studio |
 | Tester | `gemma4:26b` | Ollama |
 | DevOps | `qwen3-coder-30b` | LM Studio |
+| Researcher | `qwen3.6-35b-a3b` or Claude Sonnet (web search) | LM Studio / Claude |
 | Security | `qwen3.6-35b-a3b` | LM Studio |
 | End-User | `gemma4:26b` | Ollama |
 
