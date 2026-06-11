@@ -41,9 +41,43 @@ Current AI model roster and routing. Update this file to match your own hardware
 | `phi4:14b` | ~9.1GB | Q4_K_M | ~72 | **16k** | Quick tasks, math/STEM |
 
 **Cloud (OpenRouter)**:
+
+| Model | Provider | Tier | Role fit |
+|-------|----------|------|----------|
+| `deepseek/deepseek-v4-flash` | OR paid | Orchestrator | Orchestrator — task decomposition, cheap reasoning |
+| `anthropic/claude-sonnet-4-6` | OR paid | CC-class | Complex tasks, multi-file refactors |
+| `anthropic/claude-haiku-4-5-20251001` | OR paid | CC-light | Quick cloud inference |
+| `anthropic/claude-opus-4-7` | OR paid | CC-heavy | Nuclear option, deepest reasoning |
+| `google/gemini-2.5-pro` | OR paid | CC-alt | Alternative CC-class |
+| `google/gemini-2.5-flash` | OR paid | CC-fast | Fast cloud reasoning |
+| `openai/gpt-4o` | OR paid | CC-alt | Alternative CC-class |
+| `deepseek/deepseek-r1` | OR paid | CC-reasoning | Deep reasoning, cheap |
+| `meta-llama/llama-3.3-70b-instruct` | OR paid | Fallback | General cloud fallback |
+
+**OpenRouter Free (rate-limited, no API cost)**:
+
 | Model | Role fit |
 |-------|----------|
-| `deepseek/deepseek-v4-flash` | **Orchestrator** — task decomposition, dynamic model selection, cheap reasoning |
+| `qwen/qwen3-coder:free` | Coding (480B MoE — massive capacity) |
+| `qwen/qwen3-next-80b-a3b-instruct:free` | Reasoning (MoE, strong) |
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | Flagship reasoning (free) |
+| `nvidia/nemotron-3-super-120b-a12b:free` | Strong reasoning (free) |
+| `openai/gpt-oss-120b:free` | Large coding fallback (free) |
+| `openai/gpt-oss-20b:free` | Small coding (free) |
+| `google/gemma-4-31b-it:free` | Vision + general (free) |
+| `google/gemma-4-26b-a4b-it:free` | Vision MoE (free) |
+| `nex-agi/nex-n2-pro:free` | Generalist (free) |
+| `z-ai/glm-4.5-air:free` | Fast inference (free) |
+| `nousresearch/hermes-3-llama-3.1-405b:free` | Open-weight large (free) |
+| `meta-llama/llama-3.3-70b-instruct:free` | Generalist (free) |
+
+**Claude Code CLI** (separate from OpenRouter — uses Anthropic subscription directly):
+
+| Command | Model | Role fit |
+|---------|-------|----------|
+| `claude -p "..."` | Claude Sonnet (default) | CC-class: complex logic, multi-file refactors, security audits |
+| `claude -p "..." --model opus` | Claude Opus | Nuclear option: deepest reasoning required |
+| `claude -p "..." --model haiku` | Claude Haiku | Quick cloud tasks, cheaper
 
 **Thinking models** (`qwen3.6:35b-a3b-q4_K_M`, `qwen3.6:27b-q4_K_M`):
 - Set `max_tokens >= 4000` -- models use ~1700 reasoning tokens before output
@@ -60,21 +94,36 @@ Use 27B only if the 35B is genuinely unavailable; it is slower *and* less capabl
 ## Routing
 
 ```
-TIER 0 -- OpenRouter (orchestrator only)
-  deepseek/deepseek-v4-flash --> Orchestrator (task decomposition, dynamic model selection)
+TIER 0 — Orchestrator (OpenRouter)
+  deepseek/deepseek-v4-flash       --> Orchestrator (task decomposition, cheap reasoning)
   when: starting a blueprint execution session
 
-TIER 1 -- Ollama (all worker roles)
-  qwen3.6:35b-a3b-q4_K_M  --> Architect, Security (thinking mode, ~104 tok/s, 16k ctx)
-  qwen3-coder:30b          --> Developer primary (~135 tok/s, 32k ctx)
-  devstral-small-2:24b     --> Developer long-ctx (SWE-bench 68%, ~47 tok/s, 64k ctx)
-  qwen2.5-coder:14b        --> Developer fast (high-volume, 64k ctx)
-  gemma4:26b               --> Tester, End-User, Vision (~113 tok/s, 32k ctx)
-  when: local inference exhausted
+TIER 1 — Local Ollama (all routine dev, free)
+  qwen3.6:35b-a3b-q4_K_M          --> Architect, Security (thinking mode, ~104 tok/s, 16k ctx)
+  qwen3-coder:30b                  --> Developer primary (~135 tok/s, 32k ctx)
+  devstral-small-2:24b             --> Developer long-ctx (SWE-bench 68%, ~47 tok/s, 64k ctx)
+  qwen2.5-coder:14b                --> Developer fast (high-volume, 64k ctx)
+  gemma4:26b                       --> Tester, End-User, Vision (~113 tok/s, 32k ctx)
+  phi4:14b                         --> Tester fast, math/STEM (72 tok/s, 16k ctx)
+  when: routine tasks
 
-TIER 2 -- OpenRouter / Cloud (fallback, cost-controlled)
-  deepseek/deepseek-v4-flash --> cheap cloud inference (also orchestrator)
-  claude-sonnet or gpt-4o    --> frontier tasks (CC-class)
+TIER 2 — OpenRouter Free (fallback when local exhausted)
+  qwen/qwen3-coder:free            --> Large-scale coding (480B MoE)
+  qwen/qwen3-next-80b-a3b:free     --> Complex reasoning
+  nvidia/nemotron-3-ultra:free     --> Flagship reasoning
+  openai/gpt-oss-120b:free         --> Large coding
+  when: local model fails or task exceeds local capability
+
+TIER 3 — Claude Code CLI (CC-class tasks, uses Pro subscription)
+  claude -p "..."                  --> Claude Sonnet (default CC-class)
+  claude -p "..." --model opus     --> Claude Opus (nuclear option)
+  when: complex logic, multi-file refactors, security audits, calculation engines
+
+TIER 4 — OpenRouter Paid (fallback when Claude CLI unavailable)
+  anthropic/claude-sonnet-4-6      --> CC-class via OpenRouter
+  deepseek/deepseek-r1             --> Deep reasoning, cheap
+  google/gemini-2.5-pro            --> Alternative CC-class
+  when: Claude CLI not available, or need a specific model
 ```
 
 ### Dynamic model selection (preferred)
@@ -92,18 +141,19 @@ task, use it rather than triggering a VRAM reload.
 
 Use these when the `model-registry` MCP tool is unavailable.
 
-| Role | Primary | Provider | ctx | Fallback 1 | Fallback 2 |
-|------|---------|----------|-----|-----------|-----------|
-| **Orchestrator** | `deepseek/deepseek-v4-flash` | OpenRouter | — | Claude Sonnet (cloud) | — |
-| Architect | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` (32k, 2.7× slower) | Claude Sonnet |
-| Designer | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` | Claude Sonnet (blank canvas only) |
-| Developer (default) | `qwen3-coder:30b` | Ollama | 32k | `devstral-small-2:24b` (64k) | `qwen2.5-coder:32b-instruct` (32k) |
-| Developer (long-ctx) | `devstral-small-2:24b` | Ollama | 64k | `qwen3-coder:30b` | — |
-| Developer (fast) | `qwen2.5-coder:14b` | Ollama | 64k | `qwen3-coder:30b` | — |
-| Tester | `gemma4:26b` | Ollama | 32k | `qwen3-coder:30b` | `qwen3.6:35b-a3b-q4_K_M` |
-| DevOps | `qwen3-coder:30b` | Ollama | 32k | `devstral-small-2:24b` | `qwen3.6:35b-a3b-q4_K_M` |
-| Security | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` | Claude Sonnet |
-| End-User | `gemma4:26b` | Ollama | 32k | `gemma4:e4b-it-q4_K_M` | `qwen3.6:27b-q4_K_M` |
+|| Role | Primary | Provider | ctx | Fallback 1 | Fallback 2 | CC-class |
+||------|---------|----------|-----|-----------|-----------|----------|
+|| **Orchestrator** | `deepseek/deepseek-v4-flash` | OpenRouter | — | Claude Sonnet (cloud) | — | — |
+|| Architect | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` (32k, 2.7× slower) | `deepseek/deepseek-r1` (OR) | Claude Sonnet |
+|| Designer | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` | Claude Sonnet (blank canvas only) | — |
+|| Developer (default) | `qwen3-coder:30b` | Ollama | 32k | `devstral-small-2:24b` (64k) | `qwen/qwen3-coder:free` (OR) | Claude Sonnet |
+|| Developer (long-ctx) | `devstral-small-2:24b` | Ollama | 64k | `qwen3-coder:30b` | — | Claude Sonnet |
+|| Developer (fast) | `qwen2.5-coder:14b` | Ollama | 64k | `qwen3-coder:30b` | — | Claude Sonnet |
+|| Tester | `gemma4:26b` | Ollama | 32k | `qwen3-coder:30b` | `phi4:14b` | Claude Sonnet |
+|| Tester (fast) | `phi4:14b` | Ollama | 16k | `gemma4:26b` | — | — |
+|| DevOps | `qwen3-coder:30b` | Ollama | 32k | `devstral-small-2:24b` | — | Claude Sonnet |
+|| Security | `qwen3.6:35b-a3b-q4_K_M` | Ollama | 16k | `qwen3.6:27b-q4_K_M` | `claude -p` (CC) | Claude Opus |
+|| End-User | `gemma4:26b` | Ollama | 32k | `gemma4:e4b-it-q4_K_M` | `qwen3.6:27b-q4_K_M` | — |
 
 **Developer model choice guide**:
 - Single-file, high-volume, fast iteration → `qwen2.5-coder:14b` (64k, generous headroom)
@@ -113,56 +163,80 @@ Use these when the `model-registry` MCP tool is unavailable.
 
 ---
 
-## Hermes Configuration
+## Usage: One-Shot Execution
 
-Example config for a local Ollama setup. Adjust `base_url`, `default` model, and
-`skills.external_dirs` to match your environment.
+Tasks are routed via two one-shot commands, not Hermes profiles.
 
-**Local Ollama** (add to your Hermes config):
+### Routine tasks — Hermes one-shot (`hermes -z`)
+
+Uses the Hermes default model (typically local Ollama). For self-contained, well-scoped
+tasks where the executor only needs the task spec and project context:
+
+```bash
+# Local Ollama (default — uses model configured in hermes config.yaml)
+hermes -z "[fully self-contained task spec with output contract and verify command]"
+
+# Explicit OpenRouter model (for tasks needing frontier capability)
+hermes -z --provider openrouter --model qwen/qwen3-coder:free "[task spec]"
+
+# Explicit local model (override default)
+hermes -z --provider custom --model qwen3-coder:30b --base-url http://192.168.1.123:11434/v1 "[task]"
+```
+
+### CC-class tasks — Claude Code one-shot (`claude -p`)
+
+For complex, multi-file, or reasoning-heavy tasks that exceed local model capability.
+Uses your Anthropic subscription (Claude Pro/Max):
+
+```bash
+# Default (Claude Sonnet)
+claude -p "[task spec with full context and output contract]" \
+  --allowedTools "Read,Write,Bash" --max-turns 10 --output-format json
+
+# Nuclear option (Claude Opus — deepest reasoning)
+claude -p "[task]" --model opus --max-turns 15 --output-format json
+
+# Quick, cheap (Claude Haiku)
+claude -p "[task]" --model haiku --max-turns 5
+```
+
+### Execution flow
+
+```
+┌─────────────────────────────────────────────────────┐
+│ Orchestrator (Architect/Orchestrator role)           │
+│                                                       │
+│ 1. Read blueprint → select next eligible task         │
+│ 2. Is it CC-class or routine?                        │
+│    - Routine → hermes -z "[task spec]"                │
+│    - CC-class → claude -p "[task spec]"               │
+│ 3. Capture output, verify against contract            │
+│ 4. Update STATUS.md                                   │
+│ 5. Repeat                                             │
+└─────────────────────────────────────────────────────┘
+```
+
+### Hermes Configuration
+
+Example config for a local Ollama + OpenRouter setup. Adjust to match your environment.
+
 ```yaml
 model:
   provider: custom
   default: qwen3.6:35b-a3b-q4_K_M   # change to your preferred default
-  base_url: http://localhost:11434/v1
+  base_url: http://192.168.1.123:11434/v1
 auxiliary:
   vision:
     provider: custom
     model: gemma4:26b
-    base_url: http://localhost:11434/v1
+    base_url: http://192.168.1.123:11434/v1
   compression:
     provider: openrouter
     model: deepseek/deepseek-v4-flash
 skills:
   external_dirs:
-  - ~/hermes-skills/orchestration     # Linux/Mac
-  # - C:\Users\<you>\hermes-skills\orchestration   # Windows
-custom_providers:
-- name: Ollama-Local
-  base_url: http://localhost:11434/v1
-  model: qwen3-coder:30b
-```
-
-**Remote Ollama** (Ollama on a separate machine):
-```yaml
-model:
-  provider: custom
-  default: qwen3.6:35b-a3b-q4_K_M
-  base_url: http://<ollama-host>:11434/v1
-auxiliary:
-  vision:
-    provider: custom
-    model: gemma4:26b
-    base_url: http://<ollama-host>:11434/v1
-  compression:
-    provider: openrouter
-    model: deepseek/deepseek-v4-flash
-skills:
-  external_dirs:
-  - ~/hermes-skills/orchestration
-custom_providers:
-- name: Ollama-Remote
-  base_url: http://<ollama-host>:11434/v1
-  model: qwen3-coder:30b
+  - ~/hermes-skills/skills     # Linux/Mac
+  # - C:\\Users\\<you>\\hermes-skills\\skills   # Windows
 ```
 
 ---

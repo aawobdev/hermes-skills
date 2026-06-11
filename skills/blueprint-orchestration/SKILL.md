@@ -5,7 +5,7 @@ description: >
   The expensive model thinks. The cheap models do. You supervise.
 metadata:
   author: Alistair
-  version: "1.0.2"
+  version: "2.0.0"
   category: orchestration
   hermes:
     tags: [orchestration, blueprint, multi-agent, workflow, planning]
@@ -338,32 +338,66 @@ Task design rules:
 
 ### 7. MODEL STRATEGY
 See the `model-routing` Hermes skill for the current model roster and routing tiers.
-This section documents project-specific overrides and task-to-model assignments.
+This section documents project-specific overrides, execution engine selection,
+and task-to-model assignments.
 
-#### 7.1 — Role-to-model assignment
-| Role | Assigned model | Tier | Reasoning |
-|------|---------------|------|-----------|
-| Architect | [frontier model] | 3 | Requires complex reasoning |
-| Developer | [local model] | 1 | Routine execution from clear spec |
-| Tester | [mid-tier or local] | 1-2 | Methodical, not complex |
-| DevOps | [local code model] | 1 | Config/pipeline execution; escalate release-risk reasoning |
-| Security | [frontier model] | 3 | Must not miss vulnerabilities |
-| End-User | [any capable model] | 1 | Perspective > raw capability |
+#### 7.1 — Execution engine selection
 
-#### 7.2 — Task-to-model assignment
-| Task | Role | Model | Tier | Escalate to |
-|------|------|-------|------|-------------|
+| Engine | Models | Best for | Cost |
+|--------|--------|----------|------|
+| `hermes -z` | Local Ollama models (qwen3-coder:30b, phi4:14b, etc.) | Routine dev, CRUD, config, scaffolding, tests | Free (local GPU) |
+| `hermes -z` via OpenRouter | OpenRouter models (deepseek-v4-flash, qwen3-coder:free, etc.) | Tasks too complex for local but not CC-class | Cheap/free tier |
+| `claude -p` | Claude Sonnet/Opus via Anthropic subscription | CC-class tasks: complex logic, multi-file refactors, security audits | Uses existing Pro sub |
+| Manual | Human | Design decisions, UX review, ambiguous specs | — |
 
-#### 7.3 — Model-specific prompting notes
+#### 7.2 — Task-to-engine assignment
+
+| Task type | Engine | Model | Tier | Reasoning |
+|-----------|--------|-------|------|-----------|
+| Scaffolding, config, Docker | `hermes -z` local | qwen3-coder:30b | 1 | Routine mechanical work |
+| Prisma schema, API CRUD | `hermes -z` local | qwen3-coder:30b | 1 | Patterned, well-defined |
+| UI components, pages | `hermes -z` local | qwen3-coder:30b | 1 | From design spec |
+| Calculation engine port | `claude -p` | Claude Sonnet | 3 (CC) | Complex logic, multi-file, must be exact |
+| Security permissions | `claude -p` | Claude Sonnet | 3 (CC) | Security boundaries, must not miss |
+| PDF generation | `claude -p` or `hermes -z` | Claude/local | 2 | May require exploration |
+| Unit / integration tests | `hermes -z` local | phi4:14b or qwen3-coder:30b | 1 | Methodical, well-scoped |
+| Deployment config | `hermes -z` local | qwen3-coder:30b | 1 | Configuration, not reasoning |
+| Bulk transformations | shell script | — | 0 | Never use a model for this |
+
+#### 7.3 — OpenRouter model selection
+
+When using `hermes -z` with OpenRouter (for tasks exceeding local model capability):
+
+| Model ID | Provider | Best for |
+|----------|----------|----------|
+| `deepseek/deepseek-v4-flash` | OpenRouter paid | Orchestrator, cheap reasoning |
+| `qwen/qwen3-coder:free` | OpenRouter free | Large-scale coding (480B MoE) |
+| `qwen/qwen3-next-80b-a3b-instruct:free` | OpenRouter free | Complex reasoning (free) |
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | OpenRouter free | Flagship reasoning (free) |
+| `openai/gpt-oss-120b:free` | OpenRouter free | Large coding fallback (free) |
+| `anthropic/claude-sonnet-4-6` | OpenRouter paid | CC-class tasks without Claude CLI |
+| `google/gemini-2.5-pro` | OpenRouter paid | Alternative CC-class |
+
+Use `hermes -z` with `--provider openrouter --model <model-id>` to switch.
+
+#### 7.4 — Model-specific prompting notes
 For thinking models (qwen3.6-27b, qwen3.6-35b-a3b):
 - Set `max_tokens ≥ 4000` — models use ~1700 reasoning tokens before output starts
 - Use `/no_think` prefix for simple/mechanical tasks to skip reasoning overhead
 - Expect 80-120s response time for complex reasoning tasks
 - Output lives in `reasoning_content`, then `content` — don't mistake empty `content` for failure
 
-#### 7.4 — Cost guardrails
-- Crons and scheduled tasks always use cheapest model
-- Try once more on cheap model before escalating to expensive
+For Claude Code one-shots:
+- Always use `--max-turns` (5-10 routine, 15-20 complex) to prevent runaway
+- Use `--output-format json` for structured results (parse `.subtype`, `.result`)
+- Use `--allowedTools "Read,Write,Bash"` to restrict capabilities
+- For `claude -p`, set `workdir` to the project root in the terminal call
+
+#### 7.5 — Cost guardrails
+- Routine tasks → local Ollama models first (free)
+- If local model fails twice → try OpenRouter free tier
+- CC-class tasks → Claude Code (uses existing Pro subscription, no extra cost)
+- Paid OpenRouter models → only for tasks that need them and local/Free-OR failed
 - Per-task ceiling before approval needed: [define per project]
 
 ### 8. DEPENDENCY GRAPH
@@ -503,28 +537,107 @@ than identical retry, and check for drift at every task boundary.
 5. Collect the output and update STATUS.md
 6. Hand off to the next role
 
-### Automated execution (Hermes profile orchestration)
+### Automated execution (one-shot + monitor)
 
-Create a Hermes profile per role, each configured for the assigned model:
+The orchestrator (Architect or Orchestrator role) routes each task to the right execution
+engine via a one-shot command, monitors completion, and validates the output. The two
+execution engines are:
+
+#### Engine 1: Hermes one-shot (`hermes -z`)
+
+For routine development, testing, and configuration tasks — delegates to a local model
+via Ollama or OpenRouter:
 
 ```bash
-hermes profile create developer --clone
-developer config set model.default devstral-small-2:24b-instruct-2512-q4_K_M
-developer config set model.provider custom:Ollama-Desktop
-developer config set model.base_url http://localhost:11434/v1
+# One-shot Hermes session with a self-contained task prompt
+# Uses the Hermes default model + provider (typically local Ollama)
+hermes -z "Task spec: create Customer CRUD at src/app/api/v1/customers/route.ts
 
-# Per-task execution from orchestrating agent's terminal
-hermes -p developer chat -q "[role card + project context + task spec]"
+Project context: Next.js 16, Prisma, PostgreSQL, Auth.js, CSS Modules.
+prisma/schema.prisma already has Customer model with: id, firstName, surname,
+emailAddress, identityNumber, active, createdBy, createdAt.
+
+Output: src/app/api/v1/customers/route.ts with GET (list, paginated, filtered)
+and POST (create) handlers. Include Zod validation, Auth.js withAuth middleware,
+and proper error responses.
+
+Verify: curl http://localhost:3000/api/v1/customers returns JSON array."
 ```
 
-**Critical rules** (these are `prompting-standards` Part B applied to Hermes profiles):
-- The orchestrator MUST NOT do a role's work itself. Route it.
-- After each task, verify side effects on disk — files actually written, not just shown
-  (local models via `-q` often output code as text instead of calling write_file). B3.
+#### Engine 2: Claude Code one-shot (`claude -p`)
+
+For complex, multi-file, or CC-class tasks — delegates to Claude Code CLI using
+your Anthropic subscription:
+
+```bash
+# Heavy task — Claude can read/write files, run commands, iterate
+claude -p "Port the C# calculation engine to TypeScript in src/lib/calculation/
+
+Input files to read:
+- old/Backend/LifeStyleAudit.Calculation.1.0.0.0/MeasureCalculator.cs
+- old/Backend/LifeStyleAudit.Interfaces/IMeasureCalculator.cs
+- old/Backend/LifeStyleAudit.Common/GaolSeekPerAgePercentageAlgorith.cs
+- old/Backend/LifeStyleAudit.Common/IncomeTaxTable.cs
+
+Output: src/lib/calculation/ with:
+- MeasureCalculator.ts (full port, numeric equivalence)
+- GoalSeek.ts (Newton-Raphson-like iteration)
+- IncomeTaxTable.ts (SA tax bracket lookup)
+- types.ts (TypeScript interfaces)
+- __tests__/MeasureCalculator.test.ts (unit tests)
+
+Use Decimal.js for decimal(18,12) precision. Every computed property
+must match the C# original exactly. Use npm test to verify."
+
+# Run with appropriate flags
+claude -p "[task]" --allowedTools "Read,Write,Bash" --max-turns 15 --output-format json
+```
+
+#### Engine 3: Manual (user-supervised)
+
+For tasks requiring human judgment, interactive exploration, or when the blueprint
+spec is ambiguous — the human runs the task interactively in their own session.
+
+#### Choosing an engine
+
+| Task type | Engine | Example |
+|-----------|--------|---------|
+| Routine CRUD, config, scaffolding | `hermes -z` | Create API routes, Prisma schema, UI components |
+| Complex logic, multi-file refactor | `claude -p` | Calculation engine port, security permissions audit |
+| Design decisions, UX review | Manual | Colour palette, layout review, user testing |
+| Data migration, content import | `hermes -z` or `claude -p` | Seed scripts, data transformation |
+
+#### Monitor pattern
+
+After firing a one-shot, DO NOT assume it completed. Monitor and verify:
+
+```bash
+# For hermes -z: capture output directly (it returns to stdout)
+output=$(hermes -z "[task]" 2>&1)
+echo "$output"
+# Look for success indicators, error messages, or verify files on disk
+
+# For claude -p: use --output-format json for structured results
+claude -p "[task]" --allowedTools "Read,Write,Bash" --max-turns 10 --output-format json 2>&1
+# Parse the JSON: check .subtype == "success", read .result for summary
+```
+
+**Critical rules** (these are `prompting-standards` Part B applied to one-shot execution):
+- The orchestrator MUST NOT do a role's work itself. Route it with a one-shot.
+- Each one-shot prompt must be **fully self-contained** — the executor has zero context
+  from the orchestrator's session. Include all relevant file paths, project context,
+  and the exact output contract in every prompt (B2).
+- After each task, verify side effects on disk — files actually written, not just shown.
+  Hermes local models via `-z` often output code as text instead of calling write_file.
+  Claude via `-p` handles this correctly (B3).
 - After each task, verify the output against its contract — e.g. CSS class names match the
-  actual stylesheet; structured output parses. B4.
-- On failure, re-prompt with added signal (constraint/example); don't retry identically. B5.
-- Bulk mechanical transformations go via `execute_code` scripts, not model prompts. B7.
+  actual stylesheet; structured output parses. If using `claude -p --output-format json`,
+  check `.subtype` is `success` and `.result` contains the expected output (B4).
+- On failure, re-prompt with added signal (constraint/example); don't retry identically (B5).
+- For `claude -p`, use `--max-turns` to prevent runaway loops. Start with 5-10 for most
+  tasks, 15-20 for complex multi-step work (B6).
+- Bulk mechanical transformations (rename, bulk format, search-replace across many files)
+  go via `execute_code` scripts or shell commands, not model prompts (B7).
 
 ### Phase execution order
 

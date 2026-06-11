@@ -12,7 +12,7 @@ A complete multi-agent project workflow: an expensive thinking model interviews 
 
 | Skill | What it does |
 |-------|-------------|
-| [`blueprint-orchestration`](skills/blueprint-orchestration/SKILL.md) | Full workflow: interview → blueprint → execution. Start here. |
+| [`blueprint-orchestration`](skills/blueprint-orchestration/SKILL.md) | Full workflow: interview → blueprint → one-shot execution. Start here. |
 | [`role-architect`](skills/role-architect/SKILL.md) | System prompt: interviews, designs, produces the blueprint |
 | [`role-designer`](skills/role-designer/SKILL.md) | System prompt: visual decisions, UI layouts, interaction patterns |
 | [`role-developer`](skills/role-developer/SKILL.md) | System prompt: executes build tasks, writes code, never decides |
@@ -20,8 +20,9 @@ A complete multi-agent project workflow: an expensive thinking model interviews 
 | [`role-devops`](skills/role-devops/SKILL.md) | System prompt: CI/CD, environments, release, rollback, observability |
 | [`role-security-auditor`](skills/role-security-auditor/SKILL.md) | System prompt: vulnerability review, credentials, attack surface |
 | [`role-end-user`](skills/role-end-user/SKILL.md) | System prompt: simulates real user to find UX gaps |
+| [`role-orchestrator`](skills/role-orchestrator/SKILL.md) | System prompt: sequences tasks, delegates via one-shot commands (`hermes -z` / `claude -p`) |
 | [`prompting-standards`](skills/prompting-standards/SKILL.md) | LLM/prompt best practices for authoring and executing blueprints |
-| [`model-routing`](skills/model-routing/SKILL.md) | Model roster, VRAM constraints, role-to-model assignments |
+| [`model-routing`](skills/model-routing/SKILL.md) | Model roster (local Ollama + OpenRouter free/paid + Claude Code CLI), VRAM constraints, role-to-model assignments |
 
 ## Setup
 
@@ -69,4 +70,21 @@ In Hermes, load the orchestration skill and describe your project:
 My project: I want to build a monitoring dashboard for my homelab.
 ```
 
-The Architect interviews you, determines which roles activate, and produces a blueprint. You execute each phase with the assigned model. See [`skills/README.md`](skills/README.md) for the full guide.
+The Architect interviews you, determines which roles activate, and produces a blueprint.
+
+### Execution
+
+Tasks are executed via two one-shot patterns:
+
+**Routine tasks** (CRUD, config, scaffolding, tests):
+```bash
+hermes -z "TASK [N]: [fully self-contained task spec with output contract and verify command]"
+```
+
+**CC-class tasks** (complex logic, multi-file refactors, security):
+```bash
+claude -p "[task spec]" --allowedTools "Read,Write,Bash" --max-turns 15 --output-format json
+```
+
+See [`skills/README.md`](skills/README.md) for the full guide, or the `blueprint-orchestration`
+skill for the detailed workflow.
