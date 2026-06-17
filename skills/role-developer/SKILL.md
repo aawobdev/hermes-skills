@@ -166,6 +166,51 @@ orchestrator extracts the code and writes it directly.
 stylesheet. The handoff prompt must include exact class names. The orchestrator must
 verify class name alignment after each file-writing task.
 
+### Pitfall — Verify imports exist when working with pre-existing code
+
+When a task references code written by a different agent (another session, T-note,
+or previous delegation), always verify that every named import resolves at the
+module level before attempting to run or test it. Common class of failure:
+
+- Agent A writes `lib/apify.ts` with `scrapeInstagramPost()`
+- Agent B (or a route writer) assumes `requireUser` exists at `@/lib/auth` and
+  imports it — but that function was never added to `lib/auth.ts`
+- The route compiles at build time (TypeScript does not check external module
+  exports by default for `.ts` files in the runtime module resolution) but fails
+  at import time
+
+**Countermeasure:** Before testing a pre-existing route or module, scan its
+imports:
+
+```bash
+# List top-level imports from the file
+head -20 path/to/route.ts | grep "^import"
+```
+
+For each local import (starting with `@/` or `../`), check the target module
+for the named export:
+
+```bash
+grep "export.*requireUser" lib/auth.ts
+grep "^export " lib/auth.ts | grep "function\|const\|async function"
+```
+
+If the export is missing, either:
+1. Add it (if the caller's expectation is correct), or
+2. Switch the route to the standard pattern used by the rest of the codebase.
+
+**Standard auth pattern in this codebase:**
+```typescript
+import { auth } from '@/lib/auth'
+// ...
+const session = await auth()
+if (!session?.user?.id) {
+  return NextResponse.json({ error: { message: 'Unauthorised' } }, { status: 401 })
+}
+```
+This is used by every other API route. Do not introduce a new `requireUser()`
+wrapper unless you also export it from `lib/auth.ts`.
+
 ### Pitfalls — devstral-small output corruption
 
 `devstral-small-2:24b` is used for long-context tasks but has recurring corruption patterns

@@ -153,6 +153,9 @@ Must explicitly cover every area before producing the blueprint.
 **11. Patterns & preferences**
 - Existing conventions, naming style, anti-patterns? Source-of-truth policy when
   sources disagree?
+- **Agent guidance**: Does the project use `AGENTS.md` as the canonical agent guidance
+  file? (Recommended: yes — agent-agnostic, no CLAUDE.md/.cursorrules/.github/copilot-instructions.md.)
+  Should the blueprint's build plan include a task to create it?
 
 ---
 
@@ -259,6 +262,11 @@ The chosen versions/runtimes then flow into §4 (Technical Spec) and the hosting
 - Language / framework / runtime (with versions)
 - File structure with every file named and explained
 - Key interfaces, dependencies, environment variables, config files
+- **AGENTS.md**: if the project will be worked on by AI coding agents, include an
+  `AGENTS.md` at the repo root as the canonical agent guidance file (how to build,
+  test, deploy, project structure, conventions). Do NOT create `CLAUDE.md`,
+  `.cursorrules`, or `.github/copilot-instructions.md` — `AGENTS.md` is agent-agnostic.
+  Existing `CLAUDE.md` files in a repo should be one-line pointers to `AGENTS.md`.
 
 ### 4b. CONTENT INVENTORY *(skip for greenfield)*
 - Sources, format, volume, extraction approach, mapping old→new, discard list
@@ -465,6 +473,7 @@ Paste the role card (from Hermes skill `role-[name]`) into a fresh session, then
 - [ ] Coverage Matrix (§0): every cell satisfied or explicitly N/A
 - [ ] No hardcoded secrets or credentials
 - [ ] File structure matches technical spec
+- [ ] `AGENTS.md` exists at repo root if AI agents will work on this project (no CLAUDE.md/.cursorrules)
 - [ ] Design matches design spec (if Designer was active)
 - [ ] Edge cases from user stories are handled
 - [ ] NFRs met: performance budgets and accessibility target verified (§4c)
@@ -527,6 +536,11 @@ The Architect produces `DECISIONS.md` alongside `STATUS.md`. Append when:
 Execution follows `prompting-standards` Part B: fresh session per role, stable prompt prefix,
 verify side effects on disk, validate structured output, re-prompt with new signal rather
 than identical retry, and check for drift at every task boundary.
+
+**Before starting any task**: if the project repo has an `AGENTS.md` (root or nearest
+subdirectory), read it first. It contains build commands, architecture, conventions, and
+environment setup that the executor needs. The one-shot prompt must still be self-contained,
+but AGENTS.md is the source of truth for that context — copy from it, don't invent.
 
 ### Manual execution (paste-and-relay)
 
@@ -672,6 +686,10 @@ PHASE 8: Closeout     → architect reviews against the Coverage Matrix, human s
 - `references/one-shot-execution.md` — Practical gotchas: shell quoting with complex
   prompts, timeout handling, partial completion, one-shot prompt templates, and
   post-execution verification steps.
+- `references/agent-agnostic-repos.md` — How to migrate a repo from CLAUDE.md to AGENTS.md,
+  how to harmonise global memory across Claude Code and Hermes (shared repo AGENTS.md
+  as the common layer, thin agent-specific global stores), and an AGENTS.md template
+  for new projects.
 
 ---
 

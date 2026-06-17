@@ -21,6 +21,42 @@ services:
 
 Then use `DATABASE_URL="postgresql://postgres:@localhost:5433/dbname"` in Prisma configs.
 
+### Problem: Docker Desktop WSL2 port forwarding broken — `expose returned unexpected status: 500`
+
+When Docker Desktop's WSL2 port proxy (`/forwards/expose`) is broken, **all** container
+port mappings via `ports:` in docker-compose fail silently at start and containers may
+not reach the host network correctly. This appeared after migrating from pure-Windows to
+WSL2: DB built fine but app container errored with:
+
+```
+Error response from daemon: ports are not available: exposing port TCP 0.0.0.0:3000
+-> 127.0.0.1:0: /forwards/expose returned unexpected status: 500
+```
+
+### Fix: Use `network_mode: host` for affected containers
+
+This bypasses Docker Desktop's faulty WSL2 proxy and binds directly to the WSL
+host socket, giving real ports on the WSL network interface.
+
+```yaml
+services:
+  app:
+    network_mode: host  # ← replaces 'ports' section entirely
+    environment:
+      - DATABASE_URL=postgresql://folditin:***@172.20.135.162:5432/folditin  # WSL IP
+```
+
+**Important:** When using `network_mode: host`, containers lose access to compose
+DNS (service names like `db` won't resolve). You must set the DB connection URL
+to the container's real IP address on the WSL network. Find it via:
+
+```bash
+docker inspect recipe-site-db-1 --format '{{range $k, $v := .NetworkSettings.Networks }}{{$v.IPAddress }} {{end}}'
+```
+
+For dev-only use cases (local development), `network_mode: host` is the recommended
+fallback when Docker Desktop port forwarding fails.
+
 ## Connection Auth Failures (The pg_hba.conf Trap)
 
 ### Problem: Prisma gets "Authentication failed" even with correct password
