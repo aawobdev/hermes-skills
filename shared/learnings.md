@@ -5,12 +5,11 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 ## User
 
 - Alistair. SA dev. Homelab: 8 Proxmox VMs (pve, games, nas, media, ollama, services, server, pihole). Docker Compose in /opt/homelab.
-- GitHub: aawobdev. All git repos use SSH remotes (git@github.com:aawobdev/*.git). Personal projects under ~/projects/.
+- GitHub: aawobdev. All git repos use SSH remotes (git@github.com:aawobdev/*.git) — HTTPS fails (no credential helper). Personal projects under ~/projects/.
 - Terse, direct, terminal-native. Lead with answer, no choices. Wants fixes not explanations.
 - Prefers Slack-friendly formatting for automated reports: emoji status indicators in headers, bold section headers, bullet lists, inline code, compact, under 6 lines when nothing changed.
-- One-at-a-time delegation preferred; verify each task before next.
 - Cares about test coverage and seed data. CSS Modules, build-must-pass, no port-hopping. Function-first, polish-later.
-- Local LLMs on ollama VM (192.168.1.123): Ollama + LM Studio. Primary coder: qwen3-coder:30b. Cloud: deepseek-v4-flash via OpenRouter.
+- Local LLMs on ollama VM (192.168.1.123): Ollama + LM Studio ("custom" provider). Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b (primary, MoE), gpt-oss:20b (MoE, MXFP4), devstral:24b (agentic, vision), gemma4:26b (vision, MoE), phi4:14b (STEM/math), deepseek-r1:8b (fast reasoning). Cloud (OpenRouter): deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2, gemma3, qwen3.5 (397B-A17B, vision).
 - Interested in AI features: audio/video transcription for recipe extraction (Whisper on 3090).
 
 ## Projects
