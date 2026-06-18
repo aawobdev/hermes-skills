@@ -94,4 +94,8 @@ git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
 skills:
   external_dirs:
     - ~/hermes-skills/skills
+
+## Daily Wrap up
+
+When asked to wrap up for the day, document all changes, decisions and future tasks in the applicable docs then commit and push
 ```
