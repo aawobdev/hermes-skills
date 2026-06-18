@@ -9,8 +9,7 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - Comfortable with git, Docker, system administration.
 - Terse, direct, terminal-native. Lead with answer, no choices. Wants fixes not explanations.
 - Prefers Slack-friendly formatting for automated reports: emoji status indicators in headers, bold section headers, bullet lists, inline code, compact, under 6 lines when nothing changed.
-- Cares about test coverage and seed data. CSS Modules, build-must-pass, no port-hopping. Function-first, polish-later.
-- Local LLMs on ollama VM (192.168.1.123): Ollama + LM Studio ("custom" provider). Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b (primary, MoE), gpt-oss:20b (MoE, MXFP4), devstral:24b (agentic, vision), gemma4:26b (vision, MoE), phi4:14b (STEM/math), deepseek-r1:8b (fast reasoning). Cloud (OpenRouter): deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2, gemma3, qwen3.5 (397B-A17B, vision).
+- Local LLMs on ollama VM (192.168.1.123): Ollama + LM Studio. Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b (primary, MoE), gpt-oss:20b (MoE, MXFP4), devstral:24b (agentic, vision), gemma4:26b (vision, MoE), phi4:14b (STEM/math), deepseek-r1:8b (fast reasoning). Cloud (OpenRouter): deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2, gemma3, qwen3.5 (397B-A17B, vision).
 - Interested in AI features: audio/video transcription for recipe extraction (Whisper on 3090).
 
 ## Projects
@@ -27,4 +26,5 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - AGENTS.md is canonical for all repos. Agent-specific files (CLAUDE.md, .cursorrules, copilot-instructions.md, opencode.json) are one-line pointers — not verbose stubs.
 - WSL dev servers: recipe-site :3000, crawford-measure :5000. Node v24 via nvm.
 - Resend: verified domain folditin.co.uk, shared across projects. FROM: 'Project Name <noreply@folditin.co.uk>'. Env var: AUTH_RESEND_KEY or RESEND_API_KEY.
-- Auth.js v5: dev mode (`npm run dev`) works fine, production (`next start`) needs `AUTH_TRUST_HOST`. Port confusion causes
+- Auth.js v5: dev mode (`npm run dev`) works fine, production (`next start`) needs `AUTH_TRUST_HOST`.
+- Test coverage and seed data matter. CSS Modules, build-must-pass, no port-hopping. Function-first, polish-later.
