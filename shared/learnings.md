@@ -4,7 +4,7 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 
 ## User
 
-- Alistair. SA dev. Homelab: 8 Proxmox VMs (pve, games, nas, media, ollama, services, server, pihole). Docker Compose in /opt/homelab.
+- Alistair. SA dev. Homelab: 8 Proxmox VMs (pve, games, nas, media, ollama, services, server, pihole) with SSH host aliases. Docker Compose in /opt/homelab.
 - GitHub: aawobdev. All git repos use SSH remotes (git@github.com:aawobdev/*.git) — HTTPS fails (no credential helper). Personal projects under ~/projects/.
 - Comfortable with git, Docker, system administration.
 - Terse, direct, terminal-native. Lead with answer, no choices. Wants fixes not explanations.
