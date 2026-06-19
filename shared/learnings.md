@@ -5,10 +5,10 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 ## User
 
 - Alistair. SA dev. Homelab: 8 Proxmox VMs (pve, games, nas, media, ollama, services, server, pihole), Docker Compose in /opt/homelab, SSH host aliases. Comfortable with git, Docker, system admin.
-- GitHub: aawobdev. SSH remotes (git@github.com:aawobdev/*.git). Projects under ~/projects/.
+- GitHub: aawobdev. SSH remotes (git@github.com:aawobdev/*.git). Projects under ~/projects/ (auto-synced across machines).
 - Google account: al.ouma666@gmail.com.
 - Terse, direct, terminal-native. Automated reports: emoji status (✅⚠️❌) in headers, bold section headers (no md headers), bullet lists, inline code for names, compact, under 6 lines when nothing changed.
-- Infrastructure spans ollama server (192.168.1.123, hostname `ollama`) + laptop. Prefers consistent tooling/setup across all instances.
+- Infrastructure spans ollama server (192.168.1.123, hostname `ollama`) + laptop. Consistent tooling/setup across all instances preferred.
 - Local LLMs on ollama VM: Ollama and LM Studio both run on 192.168.1.123. Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. Cloud: deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2, gemma3, qwen3.5. qwen3-coder:30b preferred for agent work.
 - Interested in AI features: audio/video transcription for recipe extraction (Whisper on 3090).
 - Google Drive/Sheets accessible via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. No token expiry. Share Drive files with this account for agent access.
@@ -22,7 +22,6 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - hermes-skills: AI agent skill collection at ~/projects/hermes-skills/.
 - Homelab: Docker Compose across Proxmox VMs. Repo at ~/projects/homelab (WSL) / /opt/homelab (VMs). Infra reference: AGENTS.md in repo.
 - Amex reconciliation: reads credit card statements via Google Sheets service account.
-- Projects under ~/projects/ auto-synced across machines.
 
 ## Conventions
 
