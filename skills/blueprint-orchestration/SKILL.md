@@ -688,8 +688,12 @@ PHASE 8: Closeout     → architect reviews against the Coverage Matrix, human s
   post-execution verification steps.
 - `references/agent-agnostic-repos.md` — How to migrate a repo from CLAUDE.md to AGENTS.md,
   how to harmonise global memory across Claude Code and Hermes (shared repo AGENTS.md
-  as the common layer, thin agent-specific global stores), and an AGENTS.md template
-  for new projects.
+  as the common layer, thin agent-specific global stores), consolidation decision framework
+  for scattered .md files, stale blueprint handling, repos-with-no-CLAUDE.md pattern,
+  practical file-type checklist from doing 7 repos, and an AGENTS.md template for new projects.
+- `references/cross-machine-memory-sync.md` — Share Hermes learnings across multiple
+  machines via a shared git repo + LLM-curated cron. Includes the `--no-agent` script
+  pattern, symlink pitfall, and Claude Code pointer setup.
 
 ---
 
