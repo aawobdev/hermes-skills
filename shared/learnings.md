@@ -11,7 +11,7 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - Infrastructure spans ollama server + laptop. Prefers consistent tooling setup across all instances.
 - Local LLMs on ollama VM (192.168.1.123): Ollama and LM Studio both local. Live model list at http://192.168.1.123:11434/api/tags — always query rather than caching. Local: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. Cloud (OpenRouter): deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2, gemma3, qwen3.5. qwen3-coder:30b preferred for agent work (faster MoE).
 - Interested in AI features: audio/video transcription for recipe extraction (Whisper on 3090).
-- Google Drive/Sheets accessible via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. Service account = no token expiry. Share Drive files/folders with this account for agent access. Python FastMCP server at ~/.hermes/scripts/gdrive-mcp-server.py — tools for list, search, read, upload, move, copy, trash, create folders.
+- Google Drive/Sheets accessible via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. Service account = no token expiry. Share Drive files/folders with this account for agent access. Python FastMCP server at ~/.hermes/scripts/gdrive-mcp-server.py — tools for list, search, read, upload, move, copy, trash, create folders. Also registered in ~/.claude.json for cross-agent availability.
 
 ## Projects
 
@@ -27,4 +27,4 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 ## Conventions
 
 - AGENTS.md is canonical for all repos. Agent-specific files (CLAUDE.md, .cursorrules, copilot-instructions.md, opencode.json) are one-line pointers — not verbose stubs.
-- WSL dev servers: recipe-site :3000, crawford-measure :5000. Node v24 via nvm.
+- WSL dev servers: recipe-site :3000, crawford-measure 
