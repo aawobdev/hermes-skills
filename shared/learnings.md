@@ -27,5 +27,5 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 ## Conventions
 
 - AGENTS.md is canonical for all repos. Agent-specific files are one-line pointers, not verbose stubs.
-- Always query local Ollama endpoint directly for live model list rather than relying on cached memory.
+- Always query Ollama endpoint directly (GET http://192.168.1.123:11434/api/tags) for live model list rather than relying on cached memory.
 - Service account auth avoids token expiry issues; use direct file paths for keys.
