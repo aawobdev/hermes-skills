@@ -8,10 +8,10 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - GitHub: aawobdev. SSH remotes (git@github.com:aawobdev/*.git). Projects under ~/projects/.
 - Google account: al.ouma666@gmail.com.
 - Terse, direct, terminal-native. Automated reports: emoji status in headers, bold section headers, bullet lists, inline code, compact, under 6 lines when nothing changed.
-- Infrastructure spans ollama server + laptop. Prefers consistent tooling setup across all instances.
-- Local LLMs on ollama VM (192.168.1.123): Ollama and LM Studio both local. Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. Cloud (OpenRouter): deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2, gemma3, qwen3.5. qwen3-coder:30b preferred for agent work (faster MoE).
+- Infrastructure spans ollama server (192.168.1.123) + laptop. Prefers consistent tooling/setup across all instances.
+- Local LLMs on ollama VM: Ollama and LM Studio both run locally on 192.168.1.123. Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. Cloud: deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2, gemma3, qwen3.5. qwen3-coder:30b preferred for agent work.
 - Interested in AI features: audio/video transcription for recipe extraction (Whisper on 3090).
-- Google Drive/Sheets accessible via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. Service account = no token expiry. Share Drive files/folders with this account for agent access. Python FastMCP server at ~/.hermes/scripts/gdrive-mcp-server.py. Also registered in ~/.claude.json for cross-agent availability.
+- Google Drive/Sheets accessible via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. No token expiry. Share Drive files with this account for agent access.
 
 ## Projects
 
@@ -26,4 +26,6 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 
 ## Conventions
 
-- AGENTS.md is canonical for all repos. Agent-specific files (CLAUDE.md, .cursorrules, copilot-instructions.md, opencode.json) are one-line pointers — not verbose stubs.
+- AGENTS.md is canonical for all repos. Agent-specific files are one-line pointers, not verbose stubs.
+- Always query local Ollama endpoint directly for live model list rather than relying on cached memory.
+- Service account auth avoids token expiry issues; use direct file paths for keys.
