@@ -7,14 +7,14 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - Alistair. SA dev. Homelab: 8 Proxmox VMs (pve, games, nas, media, ollama, services, server, pihole), Docker Compose in /opt/homelab, SSH host aliases. Comfortable with git, Docker, system admin.
 - GitHub: aawobdev. SSH remotes (git@github.com:aawobdev/*.git). Projects under ~/projects/ (auto-synced across machines).
 - Google account: al.ouma666@gmail.com.
-- Terse, direct, terminal-native. Automated reports: emoji status (✅⚠️❌) in headers, bold section headers (no md headers), bullet lists, inline code for names, compact, under 6 lines when nothing changed.
+- Terse, direct, terminal-native. Tries things first, only asks as last resort. Automated reports: emoji status (✅⚠️❌) in headers, bold section headers (no md headers), bullet lists, inline code for names, compact, under 6 lines when nothing changed.
 - Infrastructure spans ollama server (192.168.1.123, hostname `ollama`) + laptop. Consistent tooling/setup across all instances preferred.
-- Credentials: Bitwarden Secrets Manager (BWS). UNIFI_SSH_PASSWORD, UNIFI_USERNAME ("root"), UNIFI_PASSWORD stored in BWS. Key location: ~/.gdrive-mcp/amex-service-account.json.
+- Credentials: Bitwarden Secrets Manager (BWS). UNIFI_SSH_PASSWORD, UNIFI_USERNAME ("root"), UNIFI_PASSWORD. Google service account key: ~/.gdrive-mcp/amex-service-account.json (amex-reconcile@hermes-499012.iam.gserviceaccount.com).
 - Plex library: shared with UK and South Africa users only.
 - Responsive to actionable follow-up suggestions — prefer concrete next steps over answers alone.
-- Local LLMs: Ollama and LM Studio on 192.168.1.123. Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. Cloud: deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2:24b, gemma3:27b, qwen3.5. qwen3-coder:30b preferred for agent work.
-- Interested in AI features: audio/video transcription for recipe extraction (Whisper on 3090).
-- Google Drive/Sheets via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com. No token expiry (service account auth). MCP tools: list, search, read, get_file, move, create_folder, copy, trash.
+- Local LLMs: Ollama (192.168.1.123:11434/api/tags for live model list — never rely on memory). LM Studio also on 192.168.1.123. Installed: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. qwen3-coder:30b preferred for agent work.
+- Google Drive/Sheets service account (no token expiry). MCP tools: list, search, read, get_file, move, create_folder, copy, trash.
+- Interested in AI: audio/video transcription for recipe extraction (Whisper on 3090).
 
 ## Projects
 
@@ -29,4 +29,3 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 ## Conventions
 
 - AGENTS.md is canonical for all repos. Agent-specific files are one-line pointers, not verbose stubs.
--
