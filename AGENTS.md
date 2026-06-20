@@ -99,3 +99,5 @@ skills:
 
 When asked to wrap up for the day, document all changes, decisions and future tasks in the applicable docs then commit and push
 ```
+
+**Hard rule: no em dashes.** As part of every wrap up, remove all em dashes (the `—` character) from code, notes/docs, and website content. Replace each with a hyphen, comma, colon, or by rephrasing. Only keep one where it is genuinely critical (e.g. quoted source material that must stay verbatim).
