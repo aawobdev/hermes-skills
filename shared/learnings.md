@@ -9,9 +9,12 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - Google account: al.ouma666@gmail.com.
 - Terse, direct, terminal-native. Automated reports: emoji status (✅⚠️❌) in headers, bold section headers (no md headers), bullet lists, inline code for names, compact, under 6 lines when nothing changed.
 - Infrastructure spans ollama server (192.168.1.123, hostname `ollama`) + laptop. Consistent tooling/setup across all instances preferred.
-- Local LLMs on ollama VM: Ollama and LM Studio both run on 192.168.1.123. Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. Cloud: deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2:24b, gemma3:27b, qwen3.5. qwen3-coder:30b preferred for agent work.
+- Credentials: Bitwarden Secrets Manager (BWS). UNIFI_SSH_PASSWORD, UNIFI_USERNAME ("root"), UNIFI_PASSWORD stored in BWS. Key location: ~/.gdrive-mcp/amex-service-account.json.
+- Plex library: shared with UK and South Africa users only.
+- Responsive to actionable follow-up suggestions — prefer concrete next steps over answers alone.
+- Local LLMs: Ollama and LM Studio on 192.168.1.123. Live model list at http://192.168.1.123:11434/api/tags. Local: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. Cloud: deepseek-v4-flash (default), qwen3-coder-next, devstral-small-2:24b, gemma3:27b, qwen3.5. qwen3-coder:30b preferred for agent work.
 - Interested in AI features: audio/video transcription for recipe extraction (Whisper on 3090).
-- Google Drive/Sheets accessible via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. No token expiry (service account auth). MCP tools: list, search, read, get_file, move, create_folder, copy, trash. Share Drive files with this account for agent access.
+- Google Drive/Sheets via service account amex-reconcile@hermes-499012.iam.gserviceaccount.com. No token expiry (service account auth). MCP tools: list, search, read, get_file, move, create_folder, copy, trash.
 
 ## Projects
 
@@ -26,5 +29,4 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 ## Conventions
 
 - AGENTS.md is canonical for all repos. Agent-specific files are one-line pointers, not verbose stubs.
-- Always query Ollama endpoint directly (GET http://192.168.1.123:11434/api/tags) for live model list rather than relying on cached memory.
-- Service account auth avoids token expiry issues; use direct fi
+-
