@@ -9,12 +9,11 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - Google account: al.ouma666@gmail.com.
 - Terse, direct, terminal-native. Tries things first, only asks as last resort. Automated reports: emoji status (✅⚠️❌) in headers, bold section headers (no md headers), bullet lists, inline code for names, compact, under 6 lines when nothing changed.
 - Infrastructure spans ollama server (192.168.1.123, hostname `ollama`) + laptop. Consistent tooling/setup across all instances preferred.
-- Credentials: Bitwarden Secrets Manager (BWS). UNIFI_SSH_PASSWORD, UNIFI_USERNAME ("root"), UNIFI_PASSWORD. Google service account key: ~/.gdrive-mcp/amex-service-account.json (amex-reconcile@hermes-499012.iam.gserviceaccount.com).
+- Credentials: Bitwarden Secrets Manager (BWS): UNIFI_SSH_PASSWORD, UNIFI_USERNAME, UNIFI_PASSWORD. Google service account key: ~/.gdrive-mcp/amex-service-account.json (amex-reconcile@hermes-499012.iam.gserviceaccount.com). No token expiry (service account, not OAuth).
 - Plex library: shared with UK and South Africa users only.
 - Responsive to actionable follow-up suggestions — prefer concrete next steps over answers alone.
-- Local LLMs: Ollama (192.168.1.123:11434/api/tags for live model list — never rely on memory). LM Studio also on 192.168.1.123. Installed: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. qwen3-coder:30b preferred for agent work.
-- Google Drive/Sheets service account (no token expiry). MCP tools: list, search, read, get_file, move, create_folder, copy, trash.
-- Interested in AI: audio/video transcription for recipe extraction (Whisper on 3090).
+- Local LLMs: Ollama (192.168.1.123:11434/api/tags for live model list — never rely on memory). Query live model list always. Installed: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. qwen3-coder:30b preferred for agent work.
+- Google Drive MCP server: ~/.hermes/scripts/gdrive-mcp-server.py. Service account amex-reconcile@hermes-499012.iam.gserviceaccount.com. Tools: list, search, read, get_file, move, create_folder, copy, trash.
 
 ## Projects
 
