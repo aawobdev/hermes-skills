@@ -5,14 +5,14 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 ## User
 
 - Alistair. SA dev. Homelab: 8 Proxmox VMs (pve, games, nas, media, ollama, services, server, pihole), Docker Compose in /opt/homelab, SSH host aliases. Comfortable with git, Docker, system admin.
-- GitHub: aawobdev. SSH remotes (git@github.com:aawobdev/*.git). Projects under ~/projects/ (auto-synced across machines).
+- GitHub: aawobdev. SSH remotes (git@github.com:aawobdev/*.git). Projects under ~/projects/ (auto-synced across machines via cron job).
 - Google account: al.ouma666@gmail.com.
 - Terse, direct, terminal-native. Tries things first, only asks as last resort. Automated reports: emoji status (✅⚠️❌) in headers, bold section headers (no md headers), bullet lists, inline code for names, compact, under 6 lines when nothing changed.
 - Infrastructure spans ollama server (192.168.1.123, hostname `ollama`) + laptop. Consistent tooling/setup across all instances preferred.
 - Credentials: Bitwarden Secrets Manager (BWS): UNIFI_SSH_PASSWORD, UNIFI_USERNAME, UNIFI_PASSWORD. Google service account key: ~/.gdrive-mcp/amex-service-account.json (amex-reconcile@hermes-499012.iam.gserviceaccount.com). No token expiry (service account, not OAuth).
 - Plex library: shared with UK and South Africa users only.
 - Responsive to actionable follow-up suggestions — prefer concrete next steps over answers alone.
-- Ollama (192.168.1.123:11434): query /api/tags for live installed models — query live, never rely on memory. Prefers qwen3-coder:30b for agent work.
+- Ollama (192.168.1.123:11434): query /api/tags for live model list — query live, never rely on memory. Prefers qwen3-coder:30b for agent work.
 
 ## Projects
 
@@ -22,8 +22,9 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - CarSync: Android native, WSL. JDK 17 (~/jdk17), Android SDK (~/Android/sdk). Phone: Samsung SM_S921B, 192.168.1.243, adb wireless.
 - hermes-skills: AI agent skill collection at ~/projects/hermes-skills/.
 - Homelab: Docker Compose across Proxmox VMs. Repo at ~/projects/homelab (WSL) / /opt/homelab (VMs). Infra reference: AGENTS.md in repo.
-- Amex reconciliation: reads credit card statements via Google Sheets service account.
+- Amex reconciliation: Google Sheets + Drive MCP server (~/.hermes/scripts/gdrive-mcp-server.py, venv Python for config.yaml). Service account: amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. MCP tools: list/search/read/get_file/move/create_folder/copy/trash. Registered in Claude Code (~/.claude.json).
+- Graylog (services VM 192.168.1.124:9009): MongoDB session auth for API. Search API: GET with query/range/limit/fields, returns CSV.
 
 ## Conventions
 
-- AGENTS.md is canonical for all repos. Agent-specific files are one-line pointers, not verbose stubs.
+- AGENTS.md is canonical for all repos. Agent-
