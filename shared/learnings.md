@@ -12,7 +12,7 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - Credentials: Bitwarden Secrets Manager (BWS): UNIFI_SSH_PASSWORD, UNIFI_USERNAME, UNIFI_PASSWORD. Google service account key: ~/.gdrive-mcp/amex-service-account.json (amex-reconcile@hermes-499012.iam.gserviceaccount.com). No token expiry (service account, not OAuth).
 - Plex library: shared with UK and South Africa users only.
 - Responsive to actionable follow-up suggestions — prefer concrete next steps over answers alone.
-- Local LLMs: Ollama (192.168.1.123:11434/api/tags for live model list — never rely on memory). Query live model list always. Installed: qwen3-coder:30b, gpt-oss:20b, devstral:24b, gemma4:26b, phi4:14b, deepseek-r1:8b. qwen3-coder:30b preferred for agent work.
+- Ollama (192.168.1.123:11434): query /api/tags for live installed models — query live, never rely on memory. Prefers qwen3-coder:30b for agent work.
 - Google Drive MCP server: ~/.hermes/scripts/gdrive-mcp-server.py. Service account amex-reconcile@hermes-499012.iam.gserviceaccount.com. Tools: list, search, read, get_file, move, create_folder, copy, trash.
 
 ## Projects
