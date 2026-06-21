@@ -23,4 +23,4 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - hermes-skills: AI agent skill collection at ~/projects/hermes-skills/.
 - Homelab: Docker Compose across Proxmox VMs. Repo at ~/projects/homelab (WSL) / /opt/homelab (VMs). Infra reference: AGENTS.md in repo.
 - Amex reconciliation: Google Sheets + Drive MCP server. Service account: amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. MCP tools: list/search/read/get_file/move/create_folder/copy/trash. Registered in Claude Code (~/.claude.json).
-- Graylog (services VM 192.168.1.124:9009): MongoDB session auth — retrieve from `docker exec graylog-mongodb mongosh --quiet graylog --eval 'print(JSON.stringify(db.sessions.findOne({authenticated:true})))' | jq -r '.session_id'` — use as Cookie header `authenti
+- Graylog (192.168.1.124:9009): auth via MongoDB session_id (Cookie: authentication=<session_id>). Search API: GET with query/range/limit/fields, returns CSV.
