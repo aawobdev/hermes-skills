@@ -1,3 +1,7 @@
+I'll merge the new facts into the existing learnings file, keeping only what's useful to any AI agent (infrastructure, credentials, project structure) and removing Hermes-specific operational details (cron syntax, script paths, tool-specific quirks, timings).
+
+---
+
 # Shared Learnings
 
 Curated durable facts useful to any AI coding agent working in Alistair's projects.
@@ -12,7 +16,7 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - Credentials: Bitwarden Secrets Manager (BWS): UNIFI_SSH_PASSWORD, UNIFI_USERNAME, UNIFI_PASSWORD. Google service account key: ~/.gdrive-mcp/amex-service-account.json (amex-reconcile@hermes-499012.iam.gserviceaccount.com). No token expiry (service account, not OAuth).
 - Plex library: shared with UK and South Africa users only.
 - Responsive to actionable follow-up suggestions — prefer concrete next steps over answers alone.
-- Ollama (192.168.1.123:11434): query /api/tags for live model list — query live, never rely on memory. Uses qwen3-coder:30b for agent/cron work.
+- Ollama (192.168.1.123:11434): query /api/tags endpoint for live model list — query live, never rely on memory.
 
 ## Projects
 
@@ -23,4 +27,4 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - hermes-skills: AI agent skill collection at ~/projects/hermes-skills/.
 - Homelab: Docker Compose across Proxmox VMs. Repo at ~/projects/homelab (WSL) / /opt/homelab (VMs). Infra reference: AGENTS.md in repo.
 - Amex reconciliation: Google Sheets + Drive MCP server. Service account: amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. MCP tools: list/search/read/get_file/move/create_folder/copy/trash. Registered in Claude Code (~/.claude.json).
-- Graylog (192.168.1.124:9009): auth via MongoDB session_id (Cookie: authentication=<session_id>). Search API: GET with query/range/limit/fields, returns CSV.
+- Graylog (192.168.1.124:9009): 
