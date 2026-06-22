@@ -101,7 +101,8 @@ Write the complete updated facts file to stdout. No preamble, no code fences."
   else
     CURATED=$(hermes -z "$PROMPT" 2>/dev/null || true)
   fi
-  CURATED=$(printf '%s' "$CURATED" | sed -e '/^```/d' | head -c 3000)
+  # Strip code fences and em dashes (repo convention: no em dashes in notes/docs).
+  CURATED=$(printf '%s' "$CURATED" | sed -e '/^```/d' -e 's/\xe2\x80\x94/-/g' | head -c 3000)
 
   if [[ -z "$CURATED" ]]; then
     echo "Curator returned empty output. Skipping (memory hash not advanced)."
@@ -123,7 +124,7 @@ if compgen -G "$HOSTS_DIR/*.md" > /dev/null; then
       echo
       echo "## host: $h"
       echo
-      cat "$f"
+      sed 's/\xe2\x80\x94/-/g' "$f"
       echo
     done
   } > "$COMBINED_FILE"
