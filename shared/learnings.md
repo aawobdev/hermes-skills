@@ -8,7 +8,7 @@ Curated durable facts useful to any AI coding agent working in Alistair's projec
 - GitHub: aawobdev. SSH remotes (git@github.com:aawobdev/*.git). Projects under ~/projects/ (auto-synced across machines).
 - Google account: al.ouma666@gmail.com.
 - Terse, direct, terminal-native. Tries things first, only asks as last resort. Automated reports: emoji status (✅⚠️❌) in headers, bold section headers (no md headers), bullet lists, inline code for names, compact, under 6 lines when nothing changed.
-- Infrastructure spans ollama server (192.168.1.123, hostname `ollama`) + laptop. Consistent tooling/setup across instances.
+- Infrastructure spans ollama VM (192.168.1.123, hostname `ollama`) + laptop. Consistent tooling/setup across instances.
 - Credentials: Bitwarden Secrets Manager (BWS): UNIFI_SSH_PASSWORD, UNIFI_USERNAME, UNIFI_PASSWORD. Google service account key: ~/.gdrive-mcp/amex-service-account.json (amex-reconcile@hermes-499012.iam.gserviceaccount.com, service account — no token expiry).
 - Plex library: shared with UK and South Africa users only.
 - Responsive to actionable follow-up suggestions — prefer concrete next steps over answers alone.
