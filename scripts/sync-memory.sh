@@ -1,92 +1,142 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Sync local Hermes memory → shared/learnings.md in hermes-skills repo
-# Designed to run as a Hermes cron job. Uses hermes -z for LLM curation.
+# Sync this machine's Hermes memory into the shared hermes-skills repo.
 #
-# Flow: git pull → read local memory → LLM curates into learnings.md → git commit + push
-# Safe to run repeatedly — idempotent (only commits if content changes).
+# Design (multi-machine safe):
+#   - Each host curates ONLY its own ~/.hermes memory into shared/hosts/<host>.md.
+#     A host never writes another host's file, so machines cannot clobber each other.
+#   - shared/learnings.md is REGENERATED deterministically by concatenating every
+#     shared/hosts/*.md (sorted). The output is identical no matter which host builds
+#     it, so the combined file converges and stops churning once memory is stable.
+#   - Curation is skipped entirely when this host's memory is unchanged since the last
+#     run (hash guard), so a stable machine produces no commits at all.
+#   - Git is self-healing: rebase onto the remote before and after committing, and
+#     retry the push once. Disjoint host files mean rebases never conflict.
+#
+# Safe to run repeatedly on every machine. Designed to run as a Hermes cron job.
 
 REPO_DIR="${HERMES_SKILLS_DIR:-$HOME/projects/hermes-skills}"
-LEARNINGS_FILE="$REPO_DIR/shared/learnings.md"
+HOSTS_DIR="$REPO_DIR/shared/hosts"
+COMBINED_FILE="$REPO_DIR/shared/learnings.md"
 MEMORY_FILE="$HOME/.hermes/memories/MEMORY.md"
 USER_FILE="$HOME/.hermes/memories/USER.md"
-HOST=$(hostname -s)
 
-# --- Check prerequisites ---
+HOST_RAW=$(hostname -s)
+# Stable slug for filenames: lowercase, non-alnum collapsed to single hyphen.
+HOST_SLUG=$(echo "$HOST_RAW" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+HOST_FILE="$HOSTS_DIR/$HOST_SLUG.md"
+HASH_FILE="$HOME/.hermes/cache/memory-sync-$HOST_SLUG.sha"
+
+# --- Prerequisites ---
 if [[ ! -d "$REPO_DIR/.git" ]]; then
   echo "ERROR: $REPO_DIR is not a git repo. Set HERMES_SKILLS_DIR env var."
   exit 1
 fi
-
 if [[ ! -f "$MEMORY_FILE" ]]; then
-  echo "No local memory file found at $MEMORY_FILE. Nothing to sync."
+  echo "No local memory file at $MEMORY_FILE. Nothing to sync."
   exit 0
 fi
 
-# --- Git pull (best effort — fail silently if offline) ---
 cd "$REPO_DIR"
-git pull --ff-only --quiet 2>/dev/null || true
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# --- Build the LLM prompt ---
-LOCAL_MEMORY=$(cat "$MEMORY_FILE" 2>/dev/null)
-LOCAL_USER=$(cat "$USER_FILE" 2>/dev/null)
-EXISTING_LEARNINGS=$(cat "$LEARNINGS_FILE" 2>/dev/null || echo "(empty — first sync)")
+sync_with_remote() {
+  git fetch --quiet origin "$BRANCH" 2>/dev/null || true
+  git rebase --quiet --autostash "origin/$BRANCH" 2>/dev/null || { git rebase --abort 2>/dev/null || true; }
+}
 
-PROMPT="You are curating a shared learnings file for AI coding agents.
+push_pending() {
+  # Push any local commits not on the upstream. Self-heals via rebase + one retry.
+  [[ -z "$(git rev-list "origin/$BRANCH..HEAD" 2>/dev/null)" ]] && return 0
+  if git push --quiet origin "$BRANCH" 2>/dev/null; then return 0; fi
+  sync_with_remote
+  git push --quiet origin "$BRANCH" 2>/dev/null
+}
 
-Read the local Hermes memory and the existing shared learnings file below.
-Produce an updated shared/learnings.md that:
+mkdir -p "$HOSTS_DIR" "$(dirname "$HASH_FILE")"
+sync_with_remote
 
-1. Merges any new durable facts from local memory into the existing file
-2. Keeps only facts useful to ANY AI coding agent (project ports, known issues, user preferences, environment facts, conventions)
-3. Removes Hermes-specific operational details (delegation command syntax, tool-specific quirks)
-4. Removes task progress, session outcomes, commit SHAs, PR numbers — anything stale in a week
-5. Groups by section: User, Projects, Conventions
-6. Maximum 2500 chars total. One fact per line. Concise.
+# --- Skip curation when this host's memory is unchanged ---
+SRC_HASH=$(cat "$MEMORY_FILE" "$USER_FILE" 2>/dev/null | sha256sum | cut -d' ' -f1)
+PREV_HASH=$(cat "$HASH_FILE" 2>/dev/null || true)
 
-Do NOT remove facts from the existing file unless they are clearly stale/contradicted.
-Do NOT add commentary or explanations — just the curated facts.
+if [[ "$SRC_HASH" == "$PREV_HASH" && -f "$HOST_FILE" ]]; then
+  echo "Memory unchanged since last sync. Skipping curation."
+else
+  LOCAL_MEMORY=$(cat "$MEMORY_FILE" 2>/dev/null)
+  LOCAL_USER=$(cat "$USER_FILE" 2>/dev/null || true)
+  EXISTING_HOST=$(cat "$HOST_FILE" 2>/dev/null || echo "(empty - first sync)")
 
---- LOCAL HERMES MEMORY (MEMORY.md) ---
+  PROMPT="You are curating the durable-facts file for ONE machine ('$HOST_RAW') in a
+shared, multi-machine knowledge base for AI coding agents.
+
+Produce an updated facts file for THIS machine that:
+1. Merges new durable facts from this machine's local memory into the existing host file.
+2. Keeps only facts useful to ANY AI coding agent (project ports, known issues, user
+   preferences, environment facts, conventions).
+3. Removes Hermes-specific operational details (delegation syntax, tool quirks).
+4. Removes task progress, session outcomes, commit SHAs, PR numbers, anything stale in a week.
+5. Groups facts under these h3 headings only: '### User', '### Projects', '### Conventions'.
+   Omit a heading if it would be empty.
+6. Maximum 2500 chars. One fact per line. Concise.
+Do NOT remove existing facts unless clearly stale or contradicted. No commentary, no code fences.
+
+--- THIS MACHINE'S LOCAL MEMORY ---
 $LOCAL_MEMORY
 
---- LOCAL USER PROFILE (USER.md) ---
+--- THIS MACHINE'S USER PROFILE ---
 $LOCAL_USER
 
---- EXISTING SHARED LEARNINGS ---
-$EXISTING_LEARNINGS
+--- EXISTING HOST FILE ($HOST_SLUG.md) ---
+$EXISTING_HOST
 
-Write the complete updated learnings.md to stdout. No preamble, no code fences."
+Write the complete updated facts file to stdout. No preamble, no code fences."
 
-# --- Run LLM curation ---
-UPDATED_LEARNINGS=$(hermes -z "$PROMPT" 2>/dev/null)
+  # Curator: prefer claude (fast, no Bitwarden startup), fall back to hermes -z.
+  CURATOR="${MEMORY_SYNC_CURATOR:-auto}"
+  CURATED=""
+  if [[ "$CURATOR" == "claude" ]] || { [[ "$CURATOR" == "auto" ]] && command -v claude &>/dev/null; }; then
+    CURATED=$(claude -p "$PROMPT" --max-turns 1 2>/dev/null || true)
+  else
+    CURATED=$(hermes -z "$PROMPT" 2>/dev/null || true)
+  fi
+  CURATED=$(printf '%s' "$CURATED" | sed -e '/^```/d' | head -c 3000)
 
-if [[ -z "$UPDATED_LEARNINGS" ]]; then
-  echo "LLM returned empty output. Skipping sync."
-  exit 0
+  if [[ -z "$CURATED" ]]; then
+    echo "Curator returned empty output. Skipping (memory hash not advanced)."
+  else
+    printf '%s\n' "$CURATED" > "$HOST_FILE"
+    printf '%s' "$SRC_HASH" > "$HASH_FILE"
+  fi
 fi
 
-# --- Strip any leading/trailing whitespace ---
-UPDATED_LEARNINGS=$(echo "$UPDATED_LEARNINGS" | sed -e '/^```/d' | head -c 3000)
-
-# --- Check if anything actually changed ---
-if [[ "$UPDATED_LEARNINGS" == "$EXISTING_LEARNINGS" ]]; then
-  echo "No changes. Learnings file already up to date."
-  exit 0
+# --- Regenerate the combined file deterministically from all host files ---
+if compgen -G "$HOSTS_DIR/*.md" > /dev/null; then
+  {
+    echo "<!-- AUTO-GENERATED by scripts/sync-memory.sh from shared/hosts/*.md. Do not edit by hand. -->"
+    echo "# Shared Hermes Learnings"
+    echo
+    echo "Durable facts synced from Hermes memory across machines. One section per machine."
+    for f in $(ls "$HOSTS_DIR"/*.md | sort); do
+      h=$(basename "$f" .md)
+      echo
+      echo "## host: $h"
+      echo
+      cat "$f"
+      echo
+    done
+  } > "$COMBINED_FILE"
 fi
 
-# --- Write, commit, push ---
-echo "$UPDATED_LEARNINGS" > "$LEARNINGS_FILE"
+# --- Commit and push ---
+git add "$HOSTS_DIR" "$COMBINED_FILE" 2>/dev/null || true
+if ! git diff --cached --quiet; then
+  git commit --quiet -m "sync: memory -> shared/learnings.md from $HOST_RAW"
+fi
 
-git add shared/learnings.md
-git commit --quiet -m "sync: memory → shared/learnings.md from $HOST" || {
-  echo "Nothing to commit (no changes)."
-  exit 0
-}
-git push --quiet 2>/dev/null || {
-  echo "Push failed (offline or conflict). Changes committed locally — will push next run."
-  exit 0
-}
-
-echo "Synced learnings from $HOST. Pushed to remote."
+if push_pending; then
+  echo "Synced learnings from $HOST_RAW. Up to date with remote."
+else
+  echo "Push failed (offline or conflict). Committed locally - will retry next run."
+fi
