@@ -35,7 +35,8 @@ Current AI model roster and routing. Update this file to match your own hardware
 | `qwen2.5-coder:32b-instruct` | ~19GB | Q4_K_M | ~tbd | 32k | Developer strong — complex coding |
 | `qwen2.5-coder:14b` | ~9GB | Q4_K_M | ~tbd | 64k | Developer fast — single-file, high-volume |
 | `glm-4.7-flash` | ~19GB | Q4_K_M | ~tbd | 32k | General fallback |
-| `gemma4:26b` | ~18GB | Q4_K_M | ~113 | **32k** | Tester, End-User, Vision |
+| `gemma4:26b` | ~18GB | Q4_K_M | ~113 | **32k** | Tester, End-User |
+| `gemma4:12b` | ~8GB | Q4_K_M | ~tbd | 32k | Vision — `gemma4:26b` lacks the vision capability tag, `12b` is the working vision model |
 | `gemma4:e4b-it-q4_K_M` | ~9.6GB | Q4_K_M | ~108 | 64k | Fast tasks, End-User |
 | `gpt-oss:20b` | ~13.8GB | MXFP4 | ~127 | 64k | General fallback |
 | `phi4:14b` | ~9.1GB | Q4_K_M | ~72 | **16k** | Quick tasks, math/STEM |
@@ -103,7 +104,8 @@ TIER 1 — Local Ollama (all routine dev, free)
   qwen3-coder:30b                  --> Developer primary (~135 tok/s, 32k ctx)
   devstral-small-2:24b             --> Developer long-ctx (SWE-bench 68%, ~47 tok/s, 64k ctx)
   qwen2.5-coder:14b                --> Developer fast (high-volume, 64k ctx)
-  gemma4:26b                       --> Tester, End-User, Vision (~113 tok/s, 32k ctx)
+  gemma4:26b                       --> Tester, End-User (~113 tok/s, 32k ctx)
+  gemma4:12b                       --> Vision (image description/OCR; 26b lacks vision tag)
   phi4:14b                         --> Tester fast, math/STEM (72 tok/s, 16k ctx)
   when: routine tasks
 
@@ -228,7 +230,7 @@ model:
 auxiliary:
   vision:
     provider: custom
-    model: gemma4:26b
+    model: gemma4:12b
     base_url: http://192.168.1.123:11434/v1
   compression:
     provider: openrouter

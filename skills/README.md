@@ -34,6 +34,7 @@ verification commands turns a $0.001/task local model into a reliable executor.
 | `role-researcher` | System prompt for the Researcher. Gathers evidence, compares options, produces reports. |
 | `role-security-auditor` | System prompt for the Security Auditor. Reviews for vulnerabilities. |
 | `role-end-user` | System prompt for the End-User. Simulates real user interaction. |
+| `role-orchestrator` | System prompt for the Orchestrator. Sequences tasks and delegates via one-shot commands (`hermes -z` / `claude -p`). |
 | `prompting-standards` | LLM/prompt best practices: how blueprints are authored and executed. |
 | `model-routing` | Current model roster, VRAM constraints, role-to-model assignments. |
 
@@ -53,7 +54,7 @@ Hermes loads the orchestration methodology and starts the Architect interview.
 
 **Option B: Manual (paste and relay)**
 
-1. Start a session with a strong thinking model (qwen3.6-35b-a3b via LM Studio, or Claude)
+1. Start a session with a strong thinking model (qwen3.6-35b-a3b via Ollama, or Claude)
 2. Paste the content of `role-architect/SKILL.md`
 3. Tell it your project in one sentence
 4. Answer the interview questions
@@ -109,13 +110,13 @@ not in this skills directory. Only reusable methodology lives here.
 
 | Role | Primary | Where |
 |------|---------|-------|
-| Architect | `qwen3.6-35b-a3b` | LM Studio |
-| Designer | `qwen3.6-35b-a3b` | LM Studio — spec/UX reasoning; `gemma4:26b` for vision review; Claude Sonnet for blank-canvas creative direction |
-| Developer | `qwen3-coder-30b` | LM Studio |
+| Architect | `qwen3.6-35b-a3b` | Ollama |
+| Designer | `qwen3.6-35b-a3b` | Ollama — spec/UX reasoning; `gemma4:12b` for vision review; Claude Sonnet for blank-canvas creative direction |
+| Developer | `qwen3-coder-30b` | Ollama |
 | Tester | `gemma4:26b` | Ollama |
-| DevOps | `qwen3-coder-30b` | LM Studio |
-| Researcher | `qwen3.6-35b-a3b` or Claude Sonnet (web search) | LM Studio / Claude |
-| Security | `qwen3.6-35b-a3b` | LM Studio |
+| DevOps | `qwen3-coder-30b` | Ollama |
+| Researcher | `qwen3.6-35b-a3b` or Claude Sonnet (web search) | Ollama / Claude |
+| Security | `qwen3.6-35b-a3b` | Ollama |
 | End-User | `gemma4:26b` | Ollama |
 
 Full details including tok/s benchmarks, fallbacks, and VRAM notes: see `model-routing/SKILL.md`.
@@ -125,7 +126,10 @@ Full details including tok/s benchmarks, fallbacks, and VRAM notes: see `model-r
 ## Adding a new role or updating models
 
 - Role skills are in `role-*/SKILL.md` — edit in place, changes are picked up immediately
-  (no Hermes restart needed as long as the directory is in `skills.external_dirs`)
+  (no Hermes restart needed as long as the directory is in `skills.external_dirs`). They
+  carry full Hermes frontmatter, so they're loadable as skills (`/skill role-architect`)
+  AND usable paste-and-relay (copy the SKILL.md body into any session) — both are
+  supported, pick whichever fits the moment.
 - Model changes go in `model-routing/SKILL.md`
 - Changes are picked up by Hermes immediately — no restart needed
 
@@ -143,15 +147,15 @@ hermes skills tap update aawobdev/hermes-skills  # to update
 ### Manual (external_dirs)
 
 ```bash
-git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
+git clone https://github.com/aawobdev/hermes-skills ~/projects/hermes-skills
 ```
 
 ```yaml
 # ~/.hermes/config.yaml (Linux/Mac) or %LOCALAPPDATA%\hermes\config.yaml (Windows)
 skills:
   external_dirs:
-    - ~/hermes-skills/skills       # Linux/Mac
-    # - C:\Users\<you>\hermes-skills\skills  # Windows
+    - ~/projects/hermes-skills/skills       # Linux/Mac
+    # - C:\Users\<you>\projects\hermes-skills\skills  # Windows
 ```
 
 For remote Ollama (e.g. a separate inference VM), set

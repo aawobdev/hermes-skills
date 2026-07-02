@@ -44,20 +44,20 @@ Clone and point your Hermes config at the skill directory:
 
 ```bash
 # Linux / Mac
-git clone https://github.com/aawobdev/hermes-skills ~/hermes-skills
+git clone https://github.com/aawobdev/hermes-skills ~/projects/hermes-skills
 ```
 
 ```powershell
 # Windows
-git clone https://github.com/aawobdev/hermes-skills "$env:USERPROFILE\Documents\Development\hermes-skills"
+git clone https://github.com/aawobdev/hermes-skills "$env:USERPROFILE\projects\hermes-skills"
 ```
 
 ```yaml
 # ~/.hermes/config.yaml
 skills:
   external_dirs:
-    - ~/hermes-skills/skills               # Linux/Mac
-    # - C:\Users\YourName\hermes-skills\skills  # Windows
+    - ~/projects/hermes-skills/skills               # Linux/Mac
+    # - C:\Users\YourName\projects\hermes-skills\skills  # Windows
 ```
 
 ## Usage
