@@ -47,10 +47,12 @@ Personal projects live under ~/projects/ (e.g. hermes-skills, car-sync, life-tra
 Ollama and LM Studio both run on 192.168.1.123 (ollama VM). Ollama API at 192.168.1.123:11434 - query /api/tags for live installed-model list; never rely on memory for installed models.
 Graylog on services VM (192.168.1.124:9009): MongoDB session auth - `docker exec graylog-mongodb mongosh --quiet graylog --eval 'print(JSON.stringify(db.sessions.findOne({authenticated:true})))'` then extract session_id; use as Cookie `authentication=<session_id>`. Search API uses GET with query/range/limit/fields, returns CSV.
 Google Drive MCP server at ~/.hermes/scripts/gdrive-mcp-server.py uses service account amex-reconcile@hermes-499012.iam.gserviceaccount.com, key at ~/.gdrive-mcp/amex-service-account.json. Tools: list/search/read/get_file/move/create_folder/copy/trash. Service-account auth, no token expiry. Registered in both Hermes config (venv Python path to avoid ModuleNotFoundError) and Claude Code.
-Amex-reconcile cron job uses Google Sheets via the same service account.
+Amex-reconcile: reads Emma auto-export Google Sheet (gid=1) via the service account; 90-day rolling window including today; subset-sum DP matching. Marks paid only when Notes field starts with capital "P" - ignore Tags column. Slack output uses code-block tables (Date/Amount/Category/Merchant) with uppercase shortened merchants (M&S, BA, DELIVEROO). Cron defined in config.yaml, not the cron directory.
+memory-sync cron (every 2h) syncs MEMORY.md → hermes-skills/shared/learnings.md via ~/.hermes/scripts/sync-memory.sh using `claude -p` (Opus 4.8) to avoid hermes -z Bitwarden startup overhead.
+model-lineup cron (3AM daily) uses qwen3-coder:30b via Ollama.
 Plex library shared only with UK and South Africa users.
 
 ### Conventions
 Strip em dashes from curated/automated output (repo convention).
-Personal projects kept consistent across machines (ollama server + laptop): same MCP servers, skills, and cron setup.
+Personal projects kept consistent across machines (ollama server + laptop): same MCP serv
 
