@@ -21,4 +21,4 @@ One task at a time. Never port-hop - each project has a fixed port.
 Build must pass. CSS Modules for styling.
 AGENTS.md is canonical for every repo; other agent files (CLAUDE.md etc.) are one-line pointers to it. Shared infra notes in ~/projects/homelab/AGENTS.md.
 Folder names: lowercase-hyphenated. No PascalCase, underscores, or spaces.
-For visual inspection of deployed sites use browser_navigate + browser_vision - not curl/grep.
+For visual/structural inspection of deployed sites, use browser tools (browser_navigate + browser_vision, Playwright) - not curl/grep or text descriptions alone.
