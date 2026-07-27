@@ -33,5 +33,5 @@ For visual/structural inspection of deployed sites, use browser tools (browser_n
 
 ## host: ollama
 
-Failed to authenticate. API Error: 401 Invalid authentication credentials
+Failed to authenticate. API Error: 401 OAuth access token has expired. Re-authenticate to continue.
 
